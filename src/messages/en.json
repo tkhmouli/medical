@@ -1,0 +1,297 @@
+{
+  "common": {
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "create": "Create",
+      "search": "Search",
+      "back": "Back",
+      "confirm": "Confirm",
+      "close": "Close",
+      "submit": "Submit",
+      "reset": "Reset",
+      "download": "Download",
+      "export": "Export"
+    },
+    "status": {
+      "loading": "Loading...",
+      "success": "Operation completed successfully",
+      "error": "An error occurred",
+      "notFound": "Not found"
+    },
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "date": "Date",
+      "time": "Time",
+      "status": "Status",
+      "type": "Type",
+      "notes": "Notes",
+      "actions": "Actions",
+      "description": "Description",
+      "address": "Address"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "showing": "Showing {from} to {to} of {total}"
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email address",
+      "invalidPhone": "Please enter a valid phone number"
+    }
+  },
+  "auth": {
+    "login": "Log In",
+    "logout": "Log Out",
+    "email": "Email",
+    "password": "Password",
+    "invalidCredentials": "Invalid email or password",
+    "sessionExpired": "Your session has expired. Please log in again.",
+    "accessDenied": "Access denied. You do not have permission to access this resource."
+  },
+  "patients": {
+    "title": "Patients",
+    "create": "Add New Patient",
+    "edit": "Edit Patient",
+    "search": "Search Patients",
+    "delete": "Delete Patient",
+    "deleteConfirm": "Are you sure you want to delete this patient? This action cannot be undone.",
+    "fields": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "dateOfBirth": "Date of Birth",
+      "phoneNumber": "Phone Number",
+      "secondaryPhone": "Secondary Phone",
+      "cin": "CIN (National ID)",
+      "gender": "Gender",
+      "address": "Address",
+      "notes": "Notes",
+      "email": "Email"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "dateOfBirthRequired": "Date of birth is required",
+      "phoneRequired": "Phone number is required",
+      "genderRequired": "Gender is required"
+    },
+    "noResults": "No patients found",
+    "classification": {
+      "firstTime": "First-time visitor",
+      "returning": "Returning patient"
+    },
+    "visitCount": "{count} visits",
+    "lastVisit": "Last visit: {date}"
+  },
+  "insurance": {
+    "title": "Insurance",
+    "add": "Add Insurance",
+    "remove": "Remove Insurance",
+    "removeConfirm": "Are you sure you want to remove this insurance record?",
+    "fields": {
+      "provider": "Insurance Provider",
+      "membershipNumber": "Membership Number",
+      "providerName": "Provider Name"
+    },
+    "providerTypes": {
+      "CNSS": "CNSS",
+      "CNOPS": "CNOPS",
+      "AXA": "AXA",
+      "Atlanta": "Atlanta",
+      "SAHAM": "SAHAM",
+      "RMA": "RMA",
+      "other": "Other"
+    },
+    "validation": {
+      "providerRequired": "Insurance provider is required",
+      "membershipRequired": "Membership number is required",
+      "providerNameRequired": "Provider name is required when type is Other"
+    }
+  },
+  "prescriptions": {
+    "title": "Prescriptions",
+    "create": "New Prescription",
+    "view": "View Prescription",
+    "list": "All Prescriptions",
+    "fields": {
+      "medications": "Medications",
+      "dosage": "Dosage",
+      "frequency": "Frequency",
+      "duration": "Duration",
+      "instructions": "Instructions",
+      "doctor": "Prescribing Doctor",
+      "date": "Date"
+    },
+    "pdf": "Download PDF",
+    "qrCode": "QR Code",
+    "noItems": "No medications added to prescription"
+  },
+  "reminders": {
+    "title": "Reminders",
+    "create": "Create Reminder",
+    "dismiss": "Dismiss",
+    "fields": {
+      "targetDate": "Target Date",
+      "type": "Reminder Type",
+      "interval": "Interval (days)",
+      "message": "Custom Message",
+      "patient": "Patient"
+    },
+    "types": {
+      "followUp": "Follow-up Visit",
+      "checkUp": "General Check-up",
+      "custom": "Custom"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "sent": "Sent",
+      "dismissed": "Dismissed"
+    },
+    "intervals": {
+      "fifteenDays": "15 days",
+      "thirtyDays": "30 days",
+      "custom": "Custom"
+    }
+  },
+  "medications": {
+    "title": "Medication Catalog",
+    "create": "Add Medication",
+    "edit": "Edit Medication",
+    "deactivate": "Deactivate",
+    "deactivateConfirm": "Are you sure you want to deactivate this medication?",
+    "fields": {
+      "name": "Medication Name",
+      "dosageForm": "Dosage Form",
+      "instructions": "Default Instructions"
+    },
+    "active": "Active",
+    "inactive": "Inactive",
+    "showAll": "Show All",
+    "showActive": "Show Active Only"
+  },
+  "financial": {
+    "title": "Financial",
+    "record": "Record Payment",
+    "update": "Update Payment",
+    "fields": {
+      "amount": "Amount",
+      "paymentDate": "Payment Date",
+      "status": "Payment Status",
+      "notes": "Notes",
+      "appointment": "Appointment"
+    },
+    "summary": {
+      "totalReceived": "Total Received",
+      "paidCount": "Paid Appointments",
+      "unpaidCount": "Unpaid Appointments"
+    },
+    "statuses": {
+      "paid": "Paid",
+      "unpaid": "Unpaid"
+    },
+    "dateRange": "Date Range"
+  },
+  "appointments": {
+    "title": "Appointments",
+    "create": "New Appointment",
+    "update": "Update Appointment",
+    "cancel": "Cancel Appointment",
+    "cancelConfirm": "Are you sure you want to cancel this appointment?",
+    "fields": {
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration (minutes)",
+      "visitType": "Visit Type",
+      "patient": "Patient",
+      "doctor": "Doctor",
+      "notes": "Notes"
+    },
+    "visitTypes": {
+      "newVisit": "New Visit",
+      "controlVisit": "Control Visit",
+      "followUp": "Follow-up"
+    },
+    "conflict": "Warning: This time slot overlaps with an existing appointment.",
+    "status": {
+      "active": "Active",
+      "cancelled": "Cancelled"
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "views": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month"
+    },
+    "today": "Today",
+    "noAppointments": "No appointments scheduled"
+  },
+  "users": {
+    "title": "User Management",
+    "create": "Add New User",
+    "deactivate": "Deactivate User",
+    "deactivateConfirm": "Are you sure you want to deactivate this user?",
+    "fields": {
+      "email": "Email",
+      "name": "Full Name",
+      "role": "Role",
+      "password": "Password",
+      "status": "Status"
+    },
+    "roles": {
+      "admin": "Admin",
+      "doctor": "Doctor",
+      "medicalAssistant": "Medical Assistant"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "validation": {
+      "emailRequired": "Email is required",
+      "nameRequired": "Name is required",
+      "roleRequired": "Role is required",
+      "passwordRequired": "Password is required",
+      "emailInUse": "This email is already in use"
+    }
+  },
+  "notifications": {
+    "success": "Success",
+    "error": "Error",
+    "dismiss": "Dismiss notification",
+    "operationSuccess": "Operation completed successfully",
+    "operationError": "An error occurred. Please try again."
+  },
+  "search": {
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone Number",
+    "dateOfBirth": "Date of Birth",
+    "placeholderFirstName": "Search by first name",
+    "placeholderLastName": "Search by last name",
+    "placeholderPhone": "Search by phone",
+    "clearAll": "Clear All",
+    "searching": "Searching..."
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "appointments": "Appointments",
+    "prescriptions": "Prescriptions",
+    "medications": "Medications",
+    "reminders": "Reminders",
+    "financial": "Financial",
+    "users": "Users"
+  }
+}
