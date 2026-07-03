@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { PdfPreviewModal } from '@/components/PdfPreviewModal';
 
 interface CRTemplate {
   id: string;
@@ -49,6 +50,15 @@ export default function CompteRenduPage() {
   const [newName, setNewName] = useState('');
   const [newContent, setNewContent] = useState('');
 
+  // Edit template
+  const [editingTemplate, setEditingTemplate] = useState<CRTemplate | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editContent, setEditContent] = useState('');
+
+  // PDF preview
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
   // Load custom templates
   useEffect(() => {
     try {
@@ -77,7 +87,7 @@ export default function CompteRenduPage() {
       if (response.ok) {
         const data = await response.json();
         const appts = (data.data || []).filter((a: any) => a.compteRendu);
-        const patientIds = [...new Set(appts.map((a: any) => a.patientId))];
+        const patientIds = Array.from(new Set(appts.map((a: any) => a.patientId)));
         const patientMap: Record<string, string> = {};
         await Promise.all(
           patientIds.slice(0, 20).map(async (id: string) => {
@@ -102,16 +112,103 @@ export default function CompteRenduPage() {
     setLoadingHistory(false);
   };
 
+  const saveCustomTemplates = (updatedTemplates: CRTemplate[]) => {
+    const customOnly = updatedTemplates.filter(t => t.isCustom);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customOnly));
+  };
+
   const handleCreateTemplate = () => {
     if (!newName.trim() || !newContent.trim()) return;
     const custom: CRTemplate = { id: `custom-${Date.now()}`, name: newName.trim(), content: newContent.trim(), isCustom: true };
     const updated = [...templates, custom];
     setTemplates(updated);
-    const customOnly = updated.filter(t => t.isCustom);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(customOnly));
+    saveCustomTemplates(updated);
     setNewName('');
     setNewContent('');
     setShowNewForm(false);
+  };
+
+  const handleDeleteTemplate = (templateId: string) => {
+    const updated = templates.filter(t => t.id !== templateId);
+    setTemplates(updated);
+    saveCustomTemplates(updated);
+    if (selectedTemplate?.id === templateId) setSelectedTemplate(null);
+  };
+
+  const handleStartEdit = (template: CRTemplate) => {
+    setEditingTemplate(template);
+    setEditName(template.name);
+    setEditContent(template.content);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingTemplate || !editName.trim() || !editContent.trim()) return;
+    const updated = templates.map(t =>
+      t.id === editingTemplate.id ? { ...t, name: editName.trim(), content: editContent.trim() } : t
+    );
+    setTemplates(updated);
+    saveCustomTemplates(updated);
+    setEditingTemplate(null);
+    setEditName('');
+    setEditContent('');
+  };
+
+  const handleViewCR = async (item: CRHistoryItem) => {
+    try {
+      const response = await fetch('/api/compte-rendu/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientName: item.patientName,
+          doctorName: '',
+          date: item.date,
+          compteRendu: item.compteRendu,
+          visitNotes: '',
+          prescriptionItems: [],
+          vitals: null,
+        }),
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
+        setPreviewOpen(true);
+      }
+    } catch {}
+  };
+
+  const handlePrintCR = async (item: CRHistoryItem) => {
+    try {
+      const response = await fetch('/api/compte-rendu/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientName: item.patientName,
+          doctorName: '',
+          date: item.date,
+          compteRendu: item.compteRendu,
+          visitNotes: '',
+          prescriptionItems: [],
+          vitals: null,
+        }),
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const printWindow = window.open(url, '_blank');
+        if (printWindow) {
+          printWindow.addEventListener('load', () => printWindow.print());
+        }
+      }
+    } catch {}
+  };
+
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
   };
 
   const filteredHistory = searchQuery.trim()
@@ -181,26 +278,90 @@ export default function CompteRenduPage() {
             </div>
           )}
 
+          {/* Edit Template Form */}
+          {editingTemplate && (
+            <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm font-semibold text-amber-800 mb-2">Editing: {editingTemplate.name}</p>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Template name..."
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-2"
+              />
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                placeholder="Template content..."
+                rows={8}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono mb-2"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={!editName.trim() || !editContent.trim()}
+                  className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setEditingTemplate(null)}
+                  className="rounded-md bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {templates.map(template => (
-              <button
+              <div
                 key={template.id}
-                type="button"
-                onClick={() => setSelectedTemplate(selectedTemplate?.id === template.id ? null : template)}
-                className={`rounded-lg border p-4 text-left transition-colors ${
+                className={`rounded-lg border p-4 transition-colors ${
                   selectedTemplate?.id === template.id
                     ? 'border-purple-500 bg-purple-50'
                     : template.isCustom ? 'border-purple-200 bg-purple-50/50' : 'border-gray-200 bg-white hover:bg-gray-50'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-gray-900">{template.name}</p>
-                  {template.isCustom && <span className="text-[10px] text-purple-600 font-medium bg-purple-100 px-1.5 py-0.5 rounded">Custom</span>}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTemplate(selectedTemplate?.id === template.id ? null : template)}
+                    className="text-left flex-1"
+                  >
+                    <p className="text-sm font-semibold text-gray-900">{template.name}</p>
+                  </button>
+                  <div className="flex items-center gap-1">
+                    {template.isCustom && (
+                      <>
+                        <span className="text-[10px] text-purple-600 font-medium bg-purple-100 px-1.5 py-0.5 rounded mr-1">Custom</span>
+                        <button
+                          type="button"
+                          onClick={() => handleStartEdit(template)}
+                          className="p-1 text-gray-400 hover:text-blue-600 rounded hover:bg-blue-50"
+                          title="Edit template"
+                          aria-label={`Edit ${template.name}`}
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTemplate(template.id)}
+                          className="p-1 text-gray-400 hover:text-red-600 rounded hover:bg-red-50"
+                          title="Delete template"
+                          aria-label={`Delete ${template.name}`}
+                        >
+                          🗑️
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
                 {selectedTemplate?.id === template.id && (
                   <pre className="mt-3 text-xs text-gray-700 whitespace-pre-wrap bg-white rounded-md p-3 border border-gray-100">{template.content}</pre>
                 )}
-              </button>
+              </div>
             ))}
           </div>
         </div>
@@ -224,10 +385,30 @@ export default function CompteRenduPage() {
           ) : (
             <div className="space-y-3">
               {filteredHistory.map(item => (
-                <div key={item.appointmentId} className="rounded-lg border border-purple-200 bg-purple-50 p-4">
+                <div key={item.appointmentId} className="rounded-lg border border-green-200 bg-green-50 p-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-gray-900">{item.patientName}</p>
-                    <span className="text-xs text-gray-500">{item.date}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-500">{item.date}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleViewCR(item)}
+                        className="p-1 text-gray-500 hover:text-blue-600 rounded hover:bg-white"
+                        title="View"
+                        aria-label={`View CR for ${item.patientName}`}
+                      >
+                        👁️
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handlePrintCR(item)}
+                        className="p-1 text-gray-500 hover:text-green-600 rounded hover:bg-white"
+                        title="Print"
+                        aria-label={`Print CR for ${item.patientName}`}
+                      >
+                        🖨️
+                      </button>
+                    </div>
                   </div>
                   <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap line-clamp-4">{item.compteRendu}</p>
                 </div>
@@ -236,6 +417,14 @@ export default function CompteRenduPage() {
           )}
         </div>
       )}
+
+      {/* PDF Preview Modal */}
+      <PdfPreviewModal
+        open={previewOpen}
+        onClose={handleClosePreview}
+        pdfUrl={previewUrl}
+        title="Compte Rendu Preview"
+      />
     </div>
   );
 }

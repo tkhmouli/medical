@@ -87,6 +87,12 @@ const VISIT_TYPE_COLORS: Record<VisitType, string> = {
   follow_up: 'bg-amber-100 text-amber-800',
 };
 
+const VISIT_DOT_COLORS: Record<VisitType, string> = {
+  new_visit: 'bg-blue-500 ring-blue-200',
+  control_visit: 'bg-purple-500 ring-purple-200',
+  follow_up: 'bg-amber-500 ring-amber-200',
+};
+
 // ----- Main Page Component -----
 
 /**
@@ -564,12 +570,28 @@ function VisitHistoryPanel({ visitHistory }: { visitHistory: VisitHistoryResult 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Visit History</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Patient Visit Timeline</h2>
         <div className="flex items-center gap-3 text-sm text-gray-600">
           <span>{visitHistory.totalCount} total visit{visitHistory.totalCount !== 1 ? 's' : ''}</span>
           {visitHistory.lastVisitDate && (
             <span>Last: {formatDate(visitHistory.lastVisitDate)}</span>
           )}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="mt-3 flex items-center gap-4">
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+          <span className="text-xs text-gray-600">New Visit</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-purple-500" />
+          <span className="text-xs text-gray-600">Control</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+          <span className="text-xs text-gray-600">Follow-up</span>
         </div>
       </div>
 
@@ -579,13 +601,13 @@ function VisitHistoryPanel({ visitHistory }: { visitHistory: VisitHistoryResult 
         ) : (
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-200" aria-hidden="true" />
+            <div className="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-blue-200 via-purple-200 to-amber-200" aria-hidden="true" />
 
             <ul className="space-y-4" role="list">
               {visitHistory.visits.map((visit) => (
                 <li key={visit.appointmentId} className="relative flex gap-4 pl-10">
-                  {/* Timeline dot */}
-                  <div className="absolute left-2.5 top-1.5 h-3 w-3 rounded-full border-2 border-white bg-gray-400 ring-2 ring-gray-200" aria-hidden="true" />
+                  {/* Color-coded timeline dot */}
+                  <div className={`absolute left-2.5 top-1.5 h-3 w-3 rounded-full border-2 border-white ring-2 ${VISIT_DOT_COLORS[visit.visitType]}`} aria-hidden="true" />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">

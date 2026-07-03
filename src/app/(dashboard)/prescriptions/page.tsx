@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { PdfPreviewModal } from '@/components/PdfPreviewModal';
 
 // --- Types ---
 
@@ -40,6 +41,8 @@ export default function PrescriptionsPage() {
   const [prescriptions, setPrescriptions] = useState<PrescriptionDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const fetchPrescriptions = useCallback(async () => {
     setLoading(true);
@@ -111,23 +114,41 @@ export default function PrescriptionsPage() {
     }
   };
 
-  const handleDownloadPdf = async (prescriptionId: string) => {
+  const handleViewPdf = async (prescriptionId: string) => {
     try {
       const response = await fetch(`/api/prescriptions/${prescriptionId}/pdf`);
-      if (!response.ok) {
-        return;
-      }
+      if (!response.ok) return;
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `prescription-${prescriptionId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      setPreviewUrl(url);
+      setPreviewOpen(true);
     } catch {
-      // Silent fail for PDF download
+      // Silent fail
+    }
+  };
+
+  const handlePrintPdf = async (prescriptionId: string) => {
+    try {
+      const response = await fetch(`/api/prescriptions/${prescriptionId}/pdf`);
+      if (!response.ok) return;
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const printWindow = window.open(url, '_blank');
+      if (printWindow) {
+        printWindow.addEventListener('load', () => {
+          printWindow.print();
+        });
+      }
+    } catch {
+      // Silent fail
+    }
+  };
+
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+    if (previewUrl) {
+      window.URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
     }
   };
 
@@ -167,9 +188,9 @@ export default function PrescriptionsPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-md border border-gray-200">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto rounded-md border border-green-200">
+            <table className="min-w-full divide-y divide-green-200">
+              <thead className="bg-green-50">
                 <tr>
                   <th
                     scope="col"
@@ -203,11 +224,11 @@ export default function PrescriptionsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-green-100 bg-green-50/30">
                 {prescriptions.map((prescription) => (
                   <tr
                     key={prescription.id}
-                    className="hover:bg-gray-50 transition-colors"
+                    className="hover:bg-green-50 transition-colors"
                   >
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
                       {formatDate(prescription.createdAt)}
@@ -227,28 +248,26 @@ export default function PrescriptionsPage() {
                       {prescription.notes || '—'}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleDownloadPdf(prescription.id)}
-                        className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                        aria-label={`Download PDF for prescription dated ${formatDate(prescription.createdAt)}`}
-                      >
-                        <svg
-                          className="h-3.5 w-3.5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={2}
-                          stroke="currentColor"
-                          aria-hidden="true"
+                      <div className="inline-flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleViewPdf(prescription.id)}
+                          className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                          aria-label={`View prescription dated ${formatDate(prescription.createdAt)}`}
+                          title="View"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
-                          />
-                        </svg>
-                        PDF
-                      </button>
+                          👁️
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handlePrintPdf(prescription.id)}
+                          className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                          aria-label={`Print prescription dated ${formatDate(prescription.createdAt)}`}
+                          title="Print"
+                        >
+                          🖨️
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -257,6 +276,14 @@ export default function PrescriptionsPage() {
           </div>
         )}
       </div>
+
+      {/* PDF Preview Modal */}
+      <PdfPreviewModal
+        open={previewOpen}
+        onClose={handleClosePreview}
+        pdfUrl={previewUrl}
+        title="Prescription Preview"
+      />
     </div>
   );
 }

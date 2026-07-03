@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { PdfPreviewModal } from '@/components/PdfPreviewModal';
 
 interface LabTemplate {
   id: string;
@@ -11,6 +12,7 @@ interface LabTemplate {
 
 interface LabHistoryItem {
   appointmentId: string;
+  patientId: string;
   patientName: string;
   date: string;
   tests: string[];
@@ -38,6 +40,15 @@ export default function LabRequestsPage() {
   const [showNewForm, setShowNewForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newTests, setNewTests] = useState('');
+
+  // Edit template
+  const [editingTemplate, setEditingTemplate] = useState<LabTemplate | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editTests, setEditTests] = useState('');
+
+  // PDF preview
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Load custom templates from localStorage
   useEffect(() => {
@@ -67,8 +78,7 @@ export default function LabRequestsPage() {
       if (response.ok) {
         const data = await response.json();
         const appts = (data.data || []).filter((a: any) => a.labTests);
-        // Need patient names - fetch them
-        const patientIds = [...new Set(appts.map((a: any) => a.patientId))];
+        const patientIds = Array.from(new Set(appts.map((a: any) => a.patientId)));
         const patientMap: Record<string, string> = {};
         await Promise.all(
           patientIds.slice(0, 20).map(async (id: string) => {
@@ -83,6 +93,7 @@ export default function LabRequestsPage() {
         );
         const items: LabHistoryItem[] = appts.map((a: any) => ({
           appointmentId: a.id,
+          patientId: a.patientId,
           patientName: patientMap[a.patientId] || 'Unknown',
           date: a.date,
           tests: (() => { try { return JSON.parse(a.labTests); } catch { return []; } })(),
@@ -93,18 +104,98 @@ export default function LabRequestsPage() {
     setLoadingHistory(false);
   };
 
+  const saveCustomTemplates = (updatedTemplates: LabTemplate[]) => {
+    const customOnly = updatedTemplates.filter(t => t.isCustom);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customOnly));
+  };
+
   const handleCreateTemplate = () => {
     if (!newName.trim() || !newTests.trim()) return;
     const tests = newTests.split('\n').map(t => t.trim()).filter(t => t);
     const custom: LabTemplate = { id: `custom-${Date.now()}`, name: newName.trim(), tests, isCustom: true };
     const updated = [...templates, custom];
     setTemplates(updated);
-    // Save custom ones to localStorage
-    const customOnly = updated.filter(t => t.isCustom);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(customOnly));
+    saveCustomTemplates(updated);
     setNewName('');
     setNewTests('');
     setShowNewForm(false);
+  };
+
+  const handleDeleteTemplate = (templateId: string) => {
+    const updated = templates.filter(t => t.id !== templateId);
+    setTemplates(updated);
+    saveCustomTemplates(updated);
+  };
+
+  const handleStartEdit = (template: LabTemplate) => {
+    setEditingTemplate(template);
+    setEditName(template.name);
+    setEditTests(template.tests.join('\n'));
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingTemplate || !editName.trim() || !editTests.trim()) return;
+    const tests = editTests.split('\n').map(t => t.trim()).filter(t => t);
+    const updated = templates.map(t =>
+      t.id === editingTemplate.id ? { ...t, name: editName.trim(), tests } : t
+    );
+    setTemplates(updated);
+    saveCustomTemplates(updated);
+    setEditingTemplate(null);
+    setEditName('');
+    setEditTests('');
+  };
+
+  const handleViewLab = async (item: LabHistoryItem) => {
+    try {
+      const response = await fetch('/api/lab-request/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientName: item.patientName,
+          doctorName: '',
+          date: item.date,
+          tests: item.tests,
+        }),
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
+        setPreviewOpen(true);
+      }
+    } catch {}
+  };
+
+  const handlePrintLab = async (item: LabHistoryItem) => {
+    try {
+      const response = await fetch('/api/lab-request/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientName: item.patientName,
+          doctorName: '',
+          date: item.date,
+          tests: item.tests,
+        }),
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const printWindow = window.open(url, '_blank');
+        if (printWindow) {
+          printWindow.addEventListener('load', () => printWindow.print());
+        }
+      }
+    } catch {}
+  };
+
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
   };
 
   const filteredHistory = searchQuery.trim()
@@ -173,11 +264,71 @@ export default function LabRequestsPage() {
             </div>
           )}
 
+          {/* Edit Template Form */}
+          {editingTemplate && (
+            <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm font-semibold text-amber-800 mb-2">Editing: {editingTemplate.name}</p>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Template name..."
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-2"
+              />
+              <textarea
+                value={editTests}
+                onChange={(e) => setEditTests(e.target.value)}
+                placeholder="Tests (one per line)..."
+                rows={4}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-2"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={!editName.trim() || !editTests.trim()}
+                  className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setEditingTemplate(null)}
+                  className="rounded-md bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {templates.map(template => (
               <div key={template.id} className={`rounded-lg border p-4 ${template.isCustom ? 'border-purple-200 bg-purple-50' : 'border-gray-200 bg-white'}`}>
-                <p className="text-sm font-semibold text-gray-900">{template.name}</p>
-                {template.isCustom && <span className="text-[10px] text-purple-600 font-medium">Custom</span>}
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-gray-900">{template.name}</p>
+                  {template.isCustom && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] text-purple-600 font-medium bg-purple-100 px-1.5 py-0.5 rounded mr-1">Custom</span>
+                      <button
+                        type="button"
+                        onClick={() => handleStartEdit(template)}
+                        className="p-1 text-gray-400 hover:text-blue-600 rounded hover:bg-blue-50"
+                        title="Edit template"
+                        aria-label={`Edit ${template.name}`}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTemplate(template.id)}
+                        className="p-1 text-gray-400 hover:text-red-600 rounded hover:bg-red-50"
+                        title="Delete template"
+                        aria-label={`Delete ${template.name}`}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div className="mt-2 flex flex-wrap gap-1">
                   {template.tests.map((test, idx) => (
                     <span key={idx} className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] text-blue-700">{test}</span>
@@ -210,7 +361,27 @@ export default function LabRequestsPage() {
                 <div key={item.appointmentId} className="rounded-lg border border-green-200 bg-green-50 p-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-gray-900">{item.patientName}</p>
-                    <span className="text-xs text-gray-500">{item.date}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-500">{item.date}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleViewLab(item)}
+                        className="p-1 text-gray-500 hover:text-blue-600 rounded hover:bg-white"
+                        title="View"
+                        aria-label={`View lab request for ${item.patientName}`}
+                      >
+                        👁️
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handlePrintLab(item)}
+                        className="p-1 text-gray-500 hover:text-green-600 rounded hover:bg-white"
+                        title="Print"
+                        aria-label={`Print lab request for ${item.patientName}`}
+                      >
+                        🖨️
+                      </button>
+                    </div>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1">
                     {item.tests.map((test, idx) => (
@@ -223,6 +394,14 @@ export default function LabRequestsPage() {
           )}
         </div>
       )}
+
+      {/* PDF Preview Modal */}
+      <PdfPreviewModal
+        open={previewOpen}
+        onClose={handleClosePreview}
+        pdfUrl={previewUrl}
+        title="Lab Request Preview"
+      />
     </div>
   );
 }
