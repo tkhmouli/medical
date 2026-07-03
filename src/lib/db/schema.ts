@@ -170,6 +170,7 @@ export const appointments = pgTable(
     heightCm: integer('height_cm'),
     temperatureC: varchar('temperature_c', { length: 10 }),
     compteRendu: text('compte_rendu'),
+    labTests: text('lab_tests'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },

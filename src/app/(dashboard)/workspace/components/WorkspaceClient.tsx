@@ -18,6 +18,7 @@ import { AppointmentStep } from './AppointmentStep';
 import { VitalsStep } from './VitalsStep';
 import VisitNotesStep from './VisitNotesStep';
 import { PrescriptionStep } from './PrescriptionStep';
+import { LabRequestStep } from './LabRequestStep';
 import { CompteRenduStep } from './CompteRenduStep';
 import PdfStep from './PdfStep';
 import HistoryStep from './HistoryStep';
@@ -169,6 +170,11 @@ export function WorkspaceClient({ user }: WorkspaceClientProps) {
       case 'prescription':
         return (
           <PrescriptionStep state={state} dispatch={dispatch} user={user} />
+        );
+
+      case 'lab_request':
+        return (
+          <LabRequestStep state={state} dispatch={dispatch} user={user} />
         );
 
       case 'compte_rendu':

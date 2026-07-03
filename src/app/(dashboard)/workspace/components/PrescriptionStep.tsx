@@ -375,9 +375,6 @@ export function PrescriptionStep({ state, dispatch, user }: PrescriptionStepProp
       className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
     >
       <h2 className="text-lg font-semibold text-gray-900">Prescription</h2>
-      <p className="mt-1 text-sm text-gray-500">
-        Select medications below — auto-saved when you navigate. Patient: <span className="font-medium text-gray-700">{state.patient?.firstName} {state.patient?.lastName}</span>
-      </p>
 
       <form onSubmit={(e) => e.preventDefault()} noValidate className="mt-6 space-y-6">
         {/* Error banner */}

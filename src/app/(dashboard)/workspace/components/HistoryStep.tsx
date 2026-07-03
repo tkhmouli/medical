@@ -283,12 +283,14 @@ export default function HistoryStep({ state, dispatch, user }: HistoryStepProps)
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">{t.title}</h2>
-          <p className="mt-1 text-sm text-gray-600">{t.description}</p>
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">📖</span>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Patient History</h2>
+            <p className="text-sm text-gray-500">{totalCount} visit{totalCount !== 1 ? 's' : ''} on record</p>
+          </div>
         </div>
 
-        {/* Classification badge */}
         {totalCount > 0 && (
           <span
             data-testid="classification-badge"
@@ -298,79 +300,80 @@ export default function HistoryStep({ state, dispatch, user }: HistoryStepProps)
                 : 'bg-green-100 text-green-800'
             }`}
           >
-            {totalCount === 1 ? t.firstTimeVisitor : t.returningPatient}
+            {totalCount === 1 ? '🆕 First Visit' : '🔄 Returning'}
           </span>
         )}
       </div>
 
-      {/* Empty history state */}
+      {/* Empty state */}
       {visits.length === 0 && (
-        <div className="mt-6 rounded-md bg-gray-50 p-4">
-          <p className="text-sm text-gray-600">{t.noHistory}</p>
+        <div className="mt-6 rounded-lg border-2 border-dashed border-gray-200 p-8 text-center">
+          <span className="text-3xl">📋</span>
+          <p className="mt-2 text-sm text-gray-500">No previous visits recorded</p>
         </div>
       )}
 
-      {/* Visit list */}
+      {/* Timeline */}
       {visits.length > 0 && (
-        <div className="mt-6 space-y-4">
-          {visits.map((visit) => (
-            <div
-              key={visit.appointmentId}
-              className="rounded-lg border border-gray-100 bg-gray-50 p-4"
-            >
-              {/* Visit details */}
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">
-                <div>
-                  <span className="text-xs font-medium uppercase text-gray-500">
-                    {t.date}
-                  </span>
-                  <p className="text-sm text-gray-900">{visit.date}</p>
-                </div>
-                <div>
-                  <span className="text-xs font-medium uppercase text-gray-500">
-                    {t.visitType}
-                  </span>
-                  <p className="text-sm text-gray-900">
-                    {t.visitTypeLabels[visit.visitType] || visit.visitType}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-xs font-medium uppercase text-gray-500">
-                    {t.doctor}
-                  </span>
-                  <p className="text-sm text-gray-900">{visit.doctorName}</p>
-                </div>
-                <div>
-                  <span className="text-xs font-medium uppercase text-gray-500">
-                    {t.notes}
-                  </span>
-                  <p className="text-sm text-gray-900">
-                    {visit.notes || t.noNotes}
-                  </p>
-                </div>
-              </div>
+        <div className="mt-6 space-y-3">
+          {visits.map((visit, idx) => {
+            const visitColors = {
+              new_visit: { bg: 'bg-blue-50', border: 'border-blue-200', dot: 'bg-blue-500', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-800' },
+              control_visit: { bg: 'bg-green-50', border: 'border-green-200', dot: 'bg-green-500', text: 'text-green-700', badge: 'bg-green-100 text-green-800' },
+              follow_up: { bg: 'bg-amber-50', border: 'border-amber-200', dot: 'bg-amber-500', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-800' },
+            };
+            const colors = visitColors[visit.visitType] || visitColors.new_visit;
+            const prescriptions = prescriptionsByVisit.get(visit.appointmentId) || [];
+            const formattedDate = new Date(visit.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 
-              {/* Prescription details (Admin/Doctor only) */}
-              {canSeePrescriptions && (
-                <PrescriptionSection
-                  prescriptions={prescriptionsByVisit.get(visit.appointmentId) || []}
-                />
-              )}
-            </div>
-          ))}
+            return (
+              <div
+                key={visit.appointmentId}
+                className={`rounded-lg border ${colors.border} ${colors.bg} p-4 transition-shadow hover:shadow-md`}
+              >
+                {/* Visit header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className={`w-3 h-3 rounded-full ${colors.dot}`} />
+                    <span className={`text-sm font-semibold ${colors.text}`}>{formattedDate}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${colors.badge}`}>
+                      {t.visitTypeLabels[visit.visitType] || visit.visitType}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500">Dr. {visit.doctorName}</span>
+                </div>
+
+                {/* Notes */}
+                {visit.notes && (
+                  <div className="mt-3 rounded-md bg-white/70 p-3">
+                    <p className="text-xs font-medium text-gray-600 mb-1">📝 Notes</p>
+                    <p className="text-sm text-gray-800 whitespace-pre-wrap line-clamp-3">{visit.notes}</p>
+                  </div>
+                )}
+
+                {/* Prescriptions */}
+                {canSeePrescriptions && prescriptions.length > 0 && (
+                  <div className="mt-2 rounded-md bg-white/70 p-3">
+                    <p className="text-xs font-medium text-gray-600 mb-1">💊 Medications</p>
+                    <div className="flex flex-wrap gap-2">
+                      {prescriptions.flatMap(rx => rx.items).map((item) => (
+                        <span key={item.id} className="inline-flex items-center rounded-full bg-purple-50 border border-purple-200 px-2.5 py-0.5 text-xs text-purple-800">
+                          {item.medicationName} · {item.dosage}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* No notes/prescriptions indicator */}
+                {!visit.notes && prescriptions.length === 0 && (
+                  <p className="mt-2 text-xs text-gray-400 italic">No details recorded</p>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
-
-      {/* New Encounter action */}
-      <div className="mt-6 border-t border-gray-200 pt-4">
-        <button
-          type="button"
-          onClick={handleNewEncounter}
-          className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          {t.newEncounter}
-        </button>
-      </div>
     </div>
   );
 }

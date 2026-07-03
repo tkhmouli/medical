@@ -13,11 +13,12 @@ const STEP_LABELS: Record<WorkflowStep, string> = {
   patient: 'Patient',
   appointment: 'Appt',
   vitals: 'Vitals',
+  history: 'History',
   visit_notes: 'Notes',
   prescription: 'Rx',
+  lab_request: 'Lab',
   compte_rendu: 'CR',
   pdf: 'PDF',
-  history: 'History',
 };
 
 export default function StepIndicator({

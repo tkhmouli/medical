@@ -36,6 +36,7 @@ export const updateAppointmentSchema = z.object({
   }).optional(),
   notes: z.string().optional(),
   compteRendu: z.string().optional(),
+  labTests: z.string().optional(),
 });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -59,6 +60,7 @@ export interface AppointmentResult {
   heightCm: number | null;
   temperatureC: string | null;
   compteRendu: string | null;
+  labTests: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -315,6 +317,7 @@ export async function update(
   if (validData.visitType !== undefined) updateValues.visitType = validData.visitType;
   if (validData.notes !== undefined) updateValues.notes = validData.notes;
   if (validData.compteRendu !== undefined) updateValues.compteRendu = validData.compteRendu;
+  if ((validData as any).labTests !== undefined) updateValues.labTests = (validData as any).labTests;
 
   const [updated] = await db
     .update(appointments)
@@ -403,6 +406,7 @@ export async function getByDateRange(
       heightCm: appointments.heightCm,
       temperatureC: appointments.temperatureC,
       compteRendu: appointments.compteRendu,
+      labTests: appointments.labTests,
       createdAt: appointments.createdAt,
       updatedAt: appointments.updatedAt,
     })

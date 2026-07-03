@@ -6,11 +6,12 @@ export type WorkflowStep =
   | 'patient'
   | 'appointment'
   | 'vitals'
+  | 'history'
   | 'visit_notes'
   | 'prescription'
+  | 'lab_request'
   | 'compte_rendu'
-  | 'pdf'
-  | 'history';
+  | 'pdf';
 
 export type StepStatus = 'upcoming' | 'current' | 'completed';
 
@@ -85,6 +86,7 @@ const ALL_STEPS: WorkflowStep[] = [
   'history',
   'visit_notes',
   'prescription',
+  'lab_request',
   'compte_rendu',
 ];
 

@@ -12,8 +12,61 @@ interface CompteRenduStepProps {
 
 /**
  * Compte Rendu step — doctor writes a visit summary report.
- * Auto-saves when navigating away.
+ * Auto-saves when navigating away. Templates available for quick pre-fill.
  */
+
+const CR_TEMPLATES = [
+  {
+    id: '1',
+    name: '📋 Consultation standard',
+    content: `Motif de consultation: 
+
+Antecedents: 
+
+Examen clinique:
+- Toucher rectal: 
+- Appareil urinaire: 
+
+Examens complementaires:
+
+
+Conclusion: 
+
+Conduite a tenir:
+- 
+- Controle dans `,
+  },
+  {
+    id: '2',
+    name: '🏥 Post-operatoire',
+    content: `Suites operatoires: 
+
+Examen:
+- Cicatrice: 
+- Sonde: 
+- Douleur: EVA /10
+
+Consignes:
+- 
+- Prochain RDV: `,
+  },
+  {
+    id: '3',
+    name: '🔬 Bilan initial',
+    content: `Premier bilan urologique.
+
+Motif: 
+
+Bilan demande:
+- Biologie: 
+- Imagerie: 
+
+Orientation diagnostique: 
+
+Prochain RDV apres resultats.`,
+  },
+];
+
 export function CompteRenduStep({ state, dispatch, user }: CompteRenduStepProps) {
   const [text, setText] = useState(state.compteRendu || '');
   const [generatingPdf, setGeneratingPdf] = useState(false);
@@ -80,6 +133,23 @@ export function CompteRenduStep({ state, dispatch, user }: CompteRenduStepProps)
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Compte Rendu</h2>
           <p className="text-sm text-gray-500">Visit summary — auto-saved. Use references below while writing.</p>
+        </div>
+      </div>
+
+      {/* Templates */}
+      <div className="mt-4">
+        <p className="text-xs font-semibold text-gray-600 mb-2">Quick templates:</p>
+        <div className="flex flex-wrap gap-2">
+          {CR_TEMPLATES.map(template => (
+            <button
+              key={template.id}
+              type="button"
+              onClick={() => setText(prev => prev ? prev + '\n\n' + template.content : template.content)}
+              className="rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700 hover:bg-purple-100 transition-colors"
+            >
+              {template.name}
+            </button>
+          ))}
         </div>
       </div>
 
