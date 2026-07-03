@@ -270,6 +270,12 @@ export default function PatientDetailPage() {
         />
       </div>
 
+      {/* Vital Signs & Current Medications */}
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <VitalSignsCard patientId={patientId} />
+        <CurrentMedicationsCard patientId={patientId} />
+      </div>
+
       {/* Visit history panel */}
       <div className="mt-6">
         <VisitHistoryPanel visitHistory={visitHistory} />
@@ -672,6 +678,269 @@ function PrescriptionsPanel({
           </ul>
         )}
       </div>
+    </div>
+  );
+}
+
+// ----- Vital Signs Card -----
+
+function VitalSignsCard({ patientId }: { patientId: string }) {
+  const [vitals, setVitals] = useState<{
+    bloodPressure?: string;
+    weightKg?: number;
+    heightCm?: number;
+    temperatureC?: string;
+    date?: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    bloodPressure: '',
+    temperatureC: '',
+    weightKg: '',
+    heightCm: '',
+  });
+  const [todayAppointmentId, setTodayAppointmentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchVitals() {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const apptResponse = await fetch(
+          `/api/appointments/calendar?startDate=2020-01-01&endDate=${today}`
+        );
+        if (apptResponse.ok) {
+          const apptData = await apptResponse.json();
+          const allAppts = apptData.data || [];
+          
+          // Find today's appointment for this patient
+          const todayAppt = allAppts.find((a: any) => a.patientId === patientId && a.date === today);
+          if (todayAppt) {
+            setTodayAppointmentId(todayAppt.id);
+          }
+
+          // Find latest appointment with vitals
+          const withVitals = allAppts
+            .filter((a: any) => a.patientId === patientId && (a.bloodPressure || a.weightKg || a.heightCm || a.temperatureC))
+            .sort((a: any, b: any) => b.date.localeCompare(a.date));
+
+          if (withVitals.length > 0) {
+            const latest = withVitals[0];
+            setVitals({
+              bloodPressure: latest.bloodPressure || undefined,
+              weightKg: latest.weightKg || undefined,
+              heightCm: latest.heightCm || undefined,
+              temperatureC: latest.temperatureC || undefined,
+              date: latest.date,
+            });
+          }
+        }
+      } catch {
+        // Silently fail
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchVitals();
+  }, [patientId]);
+
+  const handleSaveVitals = async () => {
+    if (!todayAppointmentId) return;
+    setSaving(true);
+    try {
+      const body: Record<string, any> = {};
+      if (formData.bloodPressure.trim()) body.bloodPressure = formData.bloodPressure.trim();
+      if (formData.temperatureC.trim()) body.temperatureC = formData.temperatureC.trim();
+      if (formData.weightKg.trim()) body.weightKg = parseInt(formData.weightKg);
+      if (formData.heightCm.trim()) body.heightCm = parseInt(formData.heightCm);
+
+      const response = await fetch(`/api/appointments/${todayAppointmentId}/vitals`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        const today = new Date().toISOString().split('T')[0];
+        setVitals({
+          bloodPressure: body.bloodPressure || vitals?.bloodPressure,
+          weightKg: body.weightKg || vitals?.weightKg,
+          heightCm: body.heightCm || vitals?.heightCm,
+          temperatureC: body.temperatureC || vitals?.temperatureC,
+          date: today,
+        });
+        setShowForm(false);
+        setFormData({ bloodPressure: '', temperatureC: '', weightKg: '', heightCm: '' });
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900">Vital Signs</h2>
+        {todayAppointmentId && (
+          <button
+            type="button"
+            onClick={() => setShowForm(!showForm)}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+          >
+            {showForm ? 'Cancel' : '+ Record Vitals'}
+          </button>
+        )}
+      </div>
+
+      {/* Record vitals form */}
+      {showForm && (
+        <div className="mt-4 rounded-md border border-gray-100 bg-gray-50 p-4 space-y-3">
+          <p className="text-xs text-gray-500 mb-2">Recording for today&apos;s appointment</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700">Blood Pressure</label>
+              <input
+                type="text"
+                value={formData.bloodPressure}
+                onChange={(e) => setFormData({ ...formData, bloodPressure: e.target.value })}
+                placeholder="120/80"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700">Temperature (°C)</label>
+              <input
+                type="text"
+                value={formData.temperatureC}
+                onChange={(e) => setFormData({ ...formData, temperatureC: e.target.value })}
+                placeholder="37.0"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700">Weight (kg)</label>
+              <input
+                type="number"
+                value={formData.weightKg}
+                onChange={(e) => setFormData({ ...formData, weightKg: e.target.value })}
+                placeholder="70"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700">Height (cm)</label>
+              <input
+                type="number"
+                value={formData.heightCm}
+                onChange={(e) => setFormData({ ...formData, heightCm: e.target.value })}
+                placeholder="175"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleSaveVitals}
+            disabled={saving}
+            className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save Vitals'}
+          </button>
+        </div>
+      )}
+
+      {/* Display vitals */}
+      {loading ? (
+        <p className="mt-4 text-sm text-gray-500">Loading...</p>
+      ) : vitals ? (
+        <div className="mt-4">
+          <p className="text-xs text-gray-500 mb-3">Last recorded: {vitals.date}</p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-md bg-red-50 border border-red-100 p-3 text-center">
+              <p className="text-xs text-red-600 font-medium">BP</p>
+              <p className="mt-1 text-sm font-bold text-red-800">{vitals.bloodPressure || '—'}</p>
+            </div>
+            <div className="rounded-md bg-orange-50 border border-orange-100 p-3 text-center">
+              <p className="text-xs text-orange-600 font-medium">Temp</p>
+              <p className="mt-1 text-sm font-bold text-orange-800">{vitals.temperatureC ? `${vitals.temperatureC}°C` : '—'}</p>
+            </div>
+            <div className="rounded-md bg-blue-50 border border-blue-100 p-3 text-center">
+              <p className="text-xs text-blue-600 font-medium">Weight</p>
+              <p className="mt-1 text-sm font-bold text-blue-800">{vitals.weightKg ? `${vitals.weightKg} kg` : '—'}</p>
+            </div>
+            <div className="rounded-md bg-green-50 border border-green-100 p-3 text-center">
+              <p className="text-xs text-green-600 font-medium">Height</p>
+              <p className="mt-1 text-sm font-bold text-green-800">{vitals.heightCm ? `${vitals.heightCm} cm` : '—'}</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <p className="mt-4 text-sm text-gray-500">
+          No vital signs recorded yet.
+          {!todayAppointmentId && ' (No appointment today to record vitals against)'}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ----- Current Medications Card -----
+
+function CurrentMedicationsCard({ patientId }: { patientId: string }) {
+  const [medications, setMedications] = useState<Array<{
+    name: string;
+    dosage: string;
+    frequency: string;
+  }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMeds() {
+      try {
+        const response = await fetch(`/api/patients/${patientId}/prescriptions`);
+        if (response.ok) {
+          const data = await response.json();
+          const prescriptions = data.data || [];
+          // Get medications from the most recent prescription
+          if (prescriptions.length > 0) {
+            const latest = prescriptions[0]; // Already sorted by most recent
+            const items = latest.items || [];
+            setMedications(items.map((item: any) => ({
+              name: item.medicationName,
+              dosage: item.dosage,
+              frequency: item.frequency,
+            })));
+          }
+        }
+      } catch {
+        // Silently fail
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchMeds();
+  }, [patientId]);
+
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <h2 className="text-lg font-semibold text-gray-900">Current Medications</h2>
+      {loading ? (
+        <p className="mt-4 text-sm text-gray-500">Loading...</p>
+      ) : medications.length > 0 ? (
+        <ul className="mt-4 space-y-2" role="list">
+          {medications.map((med, idx) => (
+            <li key={idx} className="rounded-md border border-gray-100 bg-gray-50 px-4 py-3">
+              <p className="text-sm font-medium text-gray-900">{med.name}</p>
+              <p className="text-xs text-gray-600">{med.dosage} · {med.frequency}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-4 text-sm text-gray-500">No current medications recorded.</p>
+      )}
     </div>
   );
 }

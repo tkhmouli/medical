@@ -27,6 +27,12 @@ export const insuranceProviderEnum = pgEnum('insurance_provider', [
   'RMA',
   'other',
 ]);
+export const appointmentStatusEnum = pgEnum('appointment_status', [
+  'scheduled',
+  'waiting',
+  'in_progress',
+  'completed',
+]);
 export const reminderTypeEnum = pgEnum('reminder_type', ['follow_up', 'check_up', 'custom']);
 export const reminderStatusEnum = pgEnum('reminder_status', ['pending', 'sent', 'dismissed']);
 
@@ -156,8 +162,14 @@ export const appointments = pgTable(
     startTime: time('start_time').notNull(),
     duration: integer('duration').notNull(),
     visitType: visitTypeEnum('visit_type').notNull(),
+    status: appointmentStatusEnum('status').notNull().default('scheduled'),
     isCancelled: boolean('is_cancelled').notNull().default(false),
     notes: text('notes'),
+    bloodPressure: varchar('blood_pressure', { length: 20 }),
+    weightKg: integer('weight_kg'),
+    heightCm: integer('height_cm'),
+    temperatureC: varchar('temperature_c', { length: 10 }),
+    compteRendu: text('compte_rendu'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },

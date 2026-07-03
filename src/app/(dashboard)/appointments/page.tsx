@@ -136,6 +136,9 @@ export default function AppointmentsCalendarPage() {
   const [patients, setPatients] = useState<Record<string, PatientInfo>>({});
   const [loading, setLoading] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<CalendarAppointment[] | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   // Calculate date range based on view mode
   const dateRange = useMemo(() => {
@@ -205,6 +208,91 @@ export default function AppointmentsCalendarPage() {
   useEffect(() => {
     fetchAppointments();
   }, [fetchAppointments]);
+
+  // Search handler — search by patient name or DOB
+  const handleSearch = useCallback(async () => {
+    const query = searchQuery.trim();
+    if (!query) {
+      setSearchResults(null);
+      return;
+    }
+
+    setSearchLoading(true);
+    try {
+      // Build search params — try to detect DOB format (YYYY-MM-DD or DD/MM/YYYY)
+      const params = new URLSearchParams();
+      const dobMatch = query.match(/^\d{4}-\d{2}-\d{2}$/) || query.match(/^\d{2}\/\d{2}\/\d{4}$/);
+
+      if (dobMatch) {
+        // Looks like a date of birth
+        let dob = query;
+        if (query.includes('/')) {
+          const [d, m, y] = query.split('/');
+          dob = `${y}-${m}-${d}`;
+        }
+        params.set('dateOfBirth', dob);
+      } else {
+        // Treat as name search — split into parts
+        const parts = query.split(/\s+/);
+        if (parts.length >= 2) {
+          params.set('firstName', parts[0]);
+          params.set('lastName', parts.slice(1).join(' '));
+        } else {
+          // Single term — search both first and last name
+          params.set('firstName', parts[0]);
+        }
+      }
+
+      // Search patients
+      const response = await fetch(`/api/patients?${params.toString()}`);
+      if (!response.ok) {
+        setSearchResults([]);
+        return;
+      }
+      const data = await response.json();
+      const matchedPatients: PatientInfo[] = data.data || [];
+
+      // Store patient info
+      const updatedPatients = { ...patients };
+      matchedPatients.forEach((p: PatientInfo) => {
+        updatedPatients[p.id] = p;
+      });
+      setPatients(updatedPatients);
+
+      if (matchedPatients.length === 0) {
+        setSearchResults([]);
+        return;
+      }
+
+      // Find appointments for matched patients (wide range)
+      const matchedIds = new Set(matchedPatients.map((p: PatientInfo) => p.id));
+      const startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - 6);
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + 6);
+
+      const apptResponse = await fetch(
+        `/api/appointments/calendar?startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`
+      );
+      if (apptResponse.ok) {
+        const apptData = await apptResponse.json();
+        const allAppts: CalendarAppointment[] = apptData.data || [];
+        const filtered = allAppts.filter((a) => matchedIds.has(a.patientId));
+        setSearchResults(filtered.sort((a, b) => b.date.localeCompare(a.date) || b.startTime.localeCompare(a.startTime)));
+      } else {
+        setSearchResults([]);
+      }
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, [searchQuery, patients]);
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchResults(null);
+  };
 
   // Navigation handlers
   const goToToday = () => setCurrentDate(new Date());
@@ -296,6 +384,76 @@ export default function AppointmentsCalendarPage() {
           + New Appointment
         </Link>
       </div>
+
+      {/* Search */}
+      <div className="mt-4 flex gap-2">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          placeholder="Search by patient name or date of birth..."
+          className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+        <button
+          type="button"
+          onClick={handleSearch}
+          disabled={searchLoading}
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          {searchLoading ? 'Searching...' : 'Search'}
+        </button>
+        {searchResults !== null && (
+          <button
+            type="button"
+            onClick={clearSearch}
+            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Search Results */}
+      {searchResults !== null && (
+        <div className="mt-4 rounded-md border border-gray-200 bg-white p-4">
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">
+            Search Results ({searchResults.length} appointments found)
+          </h2>
+          {searchResults.length === 0 ? (
+            <p className="text-sm text-gray-500">No appointments found for this search.</p>
+          ) : (
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {searchResults.map((appt) => {
+                const colors = VISIT_TYPE_COLORS[appt.visitType];
+                return (
+                  <button
+                    key={appt.id}
+                    type="button"
+                    onClick={() => handleAppointmentClick(appt)}
+                    className={`w-full rounded-md border p-3 text-left transition-shadow hover:shadow-md ${colors.bg} ${colors.border}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className={`text-sm font-medium ${colors.text}`}>
+                          {getPatientName(appt.patientId)}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {new Date(appt.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                          {' · '}{formatTime(appt.startTime)} · {appt.duration} min
+                        </p>
+                      </div>
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${colors.bg} ${colors.text}`}>
+                        {VISIT_TYPE_LABELS[appt.visitType]}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Controls */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4">

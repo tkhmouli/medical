@@ -292,6 +292,218 @@
     "medications": "Medications",
     "reminders": "Reminders",
     "financial": "Financial",
-    "users": "Users"
+    "users": "Users",
+    "workspace": "Workspace"
+  },
+  "workspace": {
+    "title": "Patient Workspace",
+    "subtitle": "Unified patient encounter workflow",
+    "steps": {
+      "patient": "Patient",
+      "appointment": "Appointment",
+      "visitNotes": "Visit Notes",
+      "prescription": "Prescription",
+      "pdf": "PDF",
+      "history": "History"
+    },
+    "stepStatus": {
+      "completed": "completed",
+      "current": "current",
+      "upcoming": "upcoming"
+    },
+    "patient": {
+      "title": "Patient Selection",
+      "description": "Search for an existing patient or register a new one.",
+      "searchExisting": "Search Existing",
+      "registerNew": "Register New",
+      "searchLabel": "Search by name or phone number",
+      "searchPlaceholder": "Type at least 2 characters to search...",
+      "searchHint": "Start typing to search patients by first name, last name, or phone number.",
+      "searchError": "Search is unavailable. Please try again.",
+      "searchLoadError": "Failed to load patient details. Please try again.",
+      "patientNotFound": "Patient not found. Please try again.",
+      "noResults": "No patients found",
+      "confirmed": "Patient Confirmed",
+      "confirmName": "Name:",
+      "confirmPhone": "Phone:",
+      "confirmDob": "Date of Birth:",
+      "changePatient": "Change Patient",
+      "stepCompleted": "Step Completed",
+      "patientSelected": "Patient Selected",
+      "requiredInfo": "Required Information",
+      "additionalInfo": "Additional Information",
+      "additionalInfoHint": "Optional fields for a more complete record.",
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "dateOfBirth": "Date of Birth",
+        "phoneNumber": "Phone Number",
+        "gender": "Gender",
+        "secondaryPhone": "Secondary Phone",
+        "cinNumber": "CIN Number",
+        "email": "Email",
+        "address": "Address",
+        "notes": "Notes"
+      },
+      "placeholders": {
+        "firstName": "Enter first name",
+        "lastName": "Enter last name",
+        "phoneNumber": "e.g. +212 6XX XXX XXX",
+        "secondaryPhone": "e.g. +212 5XX XXX XXX",
+        "cinNumber": "National ID number",
+        "email": "patient@example.com",
+        "address": "Street address, city, postal code",
+        "notes": "Additional remarks"
+      },
+      "gender": {
+        "selectGender": "Select gender",
+        "male": "Male",
+        "female": "Female",
+        "other": "Other"
+      },
+      "registerButton": "Register Patient",
+      "registering": "Registering...",
+      "registerSuccess": "Patient registered successfully",
+      "registerError": "Registration failed. Please try again.",
+      "unexpectedError": "An unexpected error occurred. Please try again."
+    },
+    "appointment": {
+      "patientLabel": "Patient",
+      "title": "Appointment",
+      "fields": {
+        "doctor": "Doctor",
+        "date": "Date",
+        "startTime": "Start Time",
+        "duration": "Duration (minutes)",
+        "visitType": "Visit Type"
+      },
+      "placeholders": {
+        "duration": "30",
+        "selectVisitType": "Select visit type"
+      },
+      "visitTypes": {
+        "newVisit": "New Visit",
+        "controlVisit": "Control Visit",
+        "followUp": "Follow-up"
+      },
+      "details": "Appointment Details",
+      "minutes": "{duration} minutes",
+      "bookButton": "Book Appointment",
+      "creating": "Creating...",
+      "skipped": "Appointment was skipped",
+      "conflictTitle": "Scheduling Conflict Detected",
+      "conflictMessage": "This appointment overlaps with an existing appointment for the same doctor.",
+      "conflictCreated": "The appointment was created, but you may want to reschedule.",
+      "formError": "Failed to create appointment",
+      "unexpectedError": "An unexpected error occurred. Please try again."
+    },
+    "visitNotes": {
+      "title": "Visit Notes",
+      "readOnlyTitle": "Visit Notes (Saved)",
+      "patientLabel": "Patient",
+      "appointmentLabel": "Appointment Details",
+      "noAppointment": "No appointment associated with this encounter",
+      "dateLabel": "Date",
+      "timeLabel": "Time",
+      "visitTypeLabel": "Visit Type",
+      "placeholder": "Enter clinical notes for this visit...",
+      "charCount": "{count} / 5000 characters",
+      "saveAndContinue": "Save & Continue",
+      "saving": "Saving...",
+      "saveError": "Notes could not be saved. Please try again.",
+      "noNotes": "No notes were recorded for this visit.",
+      "visitTypes": {
+        "newVisit": "New Visit",
+        "controlVisit": "Control Visit",
+        "followUp": "Follow-up"
+      }
+    },
+    "prescription": {
+      "title": "Prescription",
+      "description": "Create a prescription for {patientName}",
+      "prescriptionId": "Prescription ID:",
+      "skipped": "Prescription was skipped.",
+      "medications": "Medications",
+      "medicationsHint": "Add between 1 and 20 medication items.",
+      "medicationItem": "Medication {index}",
+      "fields": {
+        "medication": "Medication",
+        "dosage": "Dosage",
+        "frequency": "Frequency",
+        "duration": "Duration",
+        "instructions": "Instructions"
+      },
+      "placeholders": {
+        "selectMedication": "Select medication",
+        "dosage": "e.g. 500mg",
+        "frequency": "e.g. 3 times daily",
+        "duration": "e.g. 7 days",
+        "instructions": "e.g. Take after meals"
+      },
+      "addMedication": "Add Medication",
+      "removeMedication": "Remove medication {index}",
+      "createButton": "Create Prescription",
+      "creatingButton": "Creating Prescription...",
+      "loadingCatalog": "Loading medication catalog...",
+      "catalogError": "Could not load medication catalog. Please try again later.",
+      "noCatalog": "No active medications available in the catalog.",
+      "createError": "Failed to create prescription.",
+      "unexpectedError": "An unexpected error occurred. Please try again.",
+      "fixErrors": "Please fix the errors below."
+    },
+    "pdf": {
+      "title": "PDF Generation",
+      "description": "Generate and download the prescription PDF.",
+      "generateButton": "Generate PDF",
+      "downloadButton": "Download PDF",
+      "continueButton": "Continue",
+      "continueToHistory": "Continue to History",
+      "noPrescription": "No prescription was created for this visit.",
+      "generating": "Generating PDF...",
+      "downloading": "Downloading PDF...",
+      "generationSuccess": "PDF generated successfully. You can now download it.",
+      "generationFailed": "PDF generation failed. Please try again.",
+      "contactSupport": "PDF generation failed after multiple attempts. Please contact support for assistance.",
+      "retryCount": "Attempt {count} of {max} failed."
+    },
+    "history": {
+      "title": "Visit History",
+      "description": "Review past visits, notes, and prescriptions for this patient.",
+      "newEncounter": "New Encounter",
+      "noHistory": "No visit history exists for this patient.",
+      "fetchError": "Visit history could not be loaded.",
+      "retry": "Retry",
+      "loading": "Loading visit history...",
+      "badges": {
+        "firstTimeVisitor": "First-time visitor",
+        "returningPatient": "Returning patient"
+      },
+      "fields": {
+        "date": "Date",
+        "visitType": "Visit Type",
+        "doctor": "Doctor",
+        "notes": "Notes"
+      },
+      "noNotes": "No notes recorded",
+      "prescriptions": "Prescriptions",
+      "medication": "Medication",
+      "dosage": "Dosage",
+      "createdOn": "Created on",
+      "noPrescriptions": "No prescriptions for this visit",
+      "visitTypes": {
+        "newVisit": "New Visit",
+        "controlVisit": "Control Visit",
+        "followUp": "Follow-up"
+      }
+    },
+    "common": {
+      "continue": "Continue",
+      "skip": "Skip",
+      "save": "Save",
+      "required": "required",
+      "loading": "Loading...",
+      "error": "An error occurred",
+      "unsavedWarning": "You have an in-progress encounter. Data will be lost if you leave."
+    }
   }
 }

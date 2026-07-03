@@ -35,6 +35,7 @@ export const updateAppointmentSchema = z.object({
     }),
   }).optional(),
   notes: z.string().optional(),
+  compteRendu: z.string().optional(),
 });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -53,6 +54,11 @@ export interface AppointmentResult {
   visitType: VisitType;
   isCancelled: boolean;
   notes: string | null;
+  bloodPressure: string | null;
+  weightKg: number | null;
+  heightCm: number | null;
+  temperatureC: string | null;
+  compteRendu: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -308,6 +314,7 @@ export async function update(
   if (validData.duration !== undefined) updateValues.duration = validData.duration;
   if (validData.visitType !== undefined) updateValues.visitType = validData.visitType;
   if (validData.notes !== undefined) updateValues.notes = validData.notes;
+  if (validData.compteRendu !== undefined) updateValues.compteRendu = validData.compteRendu;
 
   const [updated] = await db
     .update(appointments)
@@ -391,6 +398,11 @@ export async function getByDateRange(
       visitType: appointments.visitType,
       isCancelled: appointments.isCancelled,
       notes: appointments.notes,
+      bloodPressure: appointments.bloodPressure,
+      weightKg: appointments.weightKg,
+      heightCm: appointments.heightCm,
+      temperatureC: appointments.temperatureC,
+      compteRendu: appointments.compteRendu,
       createdAt: appointments.createdAt,
       updatedAt: appointments.updatedAt,
     })

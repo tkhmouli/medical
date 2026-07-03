@@ -89,13 +89,12 @@ export async function generatePrescriptionData(
 
 /**
  * Generates a PDF buffer from prescription data.
- * Produces a simple text-based PDF structure with prescription details and QR code.
- * The buffer contains a minimal PDF with prescription information formatted for printing.
+ * Produces a proper PDF document with professional prescription layout.
  *
  * @param tenantId - The tenant context
  * @param prescriptionId - The prescription ID to generate PDF for
  * @param baseUrl - The base URL for the QR code link
- * @returns Buffer containing PDF content
+ * @returns Buffer containing valid PDF content
  */
 export async function generatePrescriptionPdf(
   tenantId: string,
@@ -103,74 +102,237 @@ export async function generatePrescriptionPdf(
   baseUrl: string
 ): Promise<Buffer> {
   const data = await generatePrescriptionData(tenantId, prescriptionId, baseUrl);
-
-  // Build a simple PDF-like text content as a buffer
-  // In production, this would use a proper PDF library like jspdf or @react-pdf/renderer
-  // For MVP, we generate a structured text representation that can be rendered client-side
-  const pdfContent = buildPdfContent(data);
-
-  return Buffer.from(pdfContent, 'utf-8');
+  return buildPdfBuffer(data);
 }
 
 /**
- * Builds the text content for the prescription PDF.
- * Includes all required details: doctor name, patient name, date,
- * medications with dosage/frequency/duration/instructions, and QR code reference.
+ * Builds a valid PDF buffer with a professional prescription layout.
+ * Uses raw PDF 1.4 syntax to create a proper document.
  */
-function buildPdfContent(data: PrescriptionPdfData): string {
-  const { prescription, doctorName, patientName, qrCodeDataUrl, generatedAt } = data;
-
-  const lines: string[] = [];
-
-  // Header
-  lines.push('═══════════════════════════════════════════════════════');
-  lines.push('                    PRESCRIPTION');
-  lines.push('═══════════════════════════════════════════════════════');
-  lines.push('');
-
-  // Doctor and patient info
-  lines.push(`Doctor: ${doctorName}`);
-  lines.push(`Patient: ${patientName}`);
-  lines.push(`Date: ${new Date(prescription.createdAt).toLocaleDateString('en-US', {
+function buildPdfBuffer(data: PrescriptionPdfData): Buffer {
+  const { prescription, doctorName, patientName, generatedAt } = data;
+  const date = new Date(prescription.createdAt).toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  })}`);
-  lines.push(`Prescription ID: ${prescription.id}`);
-  lines.push('');
+  });
 
-  // Medications
-  lines.push('───────────────────────────────────────────────────────');
-  lines.push('MEDICATIONS');
-  lines.push('───────────────────────────────────────────────────────');
-  lines.push('');
+  // Build structured content with font changes for a professional look
+  const contentOps: string[] = [];
+
+  // ─── Header: Clinic Name (bold/large) ───
+  contentOps.push('BT');
+  contentOps.push('/F2 18 Tf');
+  contentOps.push('170 790 Td');
+  contentOps.push(`(Cabinet Medical) Tj`);
+  contentOps.push('ET');
+
+  // Doctor name below header
+  contentOps.push('BT');
+  contentOps.push('/F1 12 Tf');
+  contentOps.push('200 770 Td');
+  contentOps.push(`(Dr. ${escapePdf(doctorName)}) Tj`);
+  contentOps.push('ET');
+
+  // Subtitle
+  contentOps.push('BT');
+  contentOps.push('/F1 9 Tf');
+  contentOps.push('180 755 Td');
+  contentOps.push(`(Medecin Specialiste en Urologie) Tj`);
+  contentOps.push('ET');
+
+  // Horizontal line
+  contentOps.push('0.7 0.7 0.7 RG');
+  contentOps.push('50 740 m 545 740 l S');
+  contentOps.push('0 0 0 RG');
+
+  // ─── ORDONNANCE title ───
+  contentOps.push('BT');
+  contentOps.push('/F2 16 Tf');
+  contentOps.push('220 715 Td');
+  contentOps.push('(ORDONNANCE) Tj');
+  contentOps.push('ET');
+
+  // ─── Patient & Date info ───
+  let y = 685;
+
+  contentOps.push('BT');
+  contentOps.push('/F2 10 Tf');
+  contentOps.push(`50 ${y} Td`);
+  contentOps.push(`(Patient:) Tj`);
+  contentOps.push('ET');
+  contentOps.push('BT');
+  contentOps.push('/F1 10 Tf');
+  contentOps.push(`110 ${y} Td`);
+  contentOps.push(`(${escapePdf(patientName)}) Tj`);
+  contentOps.push('ET');
+
+  y -= 18;
+  contentOps.push('BT');
+  contentOps.push('/F2 10 Tf');
+  contentOps.push(`50 ${y} Td`);
+  contentOps.push(`(Date:) Tj`);
+  contentOps.push('ET');
+  contentOps.push('BT');
+  contentOps.push('/F1 10 Tf');
+  contentOps.push(`110 ${y} Td`);
+  contentOps.push(`(${escapePdf(date)}) Tj`);
+  contentOps.push('ET');
+
+  // Light line separator
+  y -= 15;
+  contentOps.push('0.85 0.85 0.85 RG');
+  contentOps.push(`50 ${y} m 545 ${y} l S`);
+  contentOps.push('0 0 0 RG');
+
+  // ─── Medications ───
+  y -= 25;
+  contentOps.push('BT');
+  contentOps.push('/F2 11 Tf');
+  contentOps.push(`50 ${y} Td`);
+  contentOps.push('(Traitement prescrit:) Tj');
+  contentOps.push('ET');
+
+  y -= 20;
 
   for (let i = 0; i < prescription.items.length; i++) {
     const item = prescription.items[i];
-    lines.push(`${i + 1}. ${item.medicationName}`);
-    lines.push(`   Dosage: ${item.dosage}`);
-    lines.push(`   Frequency: ${item.frequency}`);
-    lines.push(`   Duration: ${item.duration}`);
+
+    // Medication name (bold)
+    contentOps.push('BT');
+    contentOps.push('/F2 10 Tf');
+    contentOps.push(`70 ${y} Td`);
+    contentOps.push(`(${i + 1}. ${escapePdf(item.medicationName)}) Tj`);
+    contentOps.push('ET');
+
+    y -= 16;
+
+    // Dosage line
+    contentOps.push('BT');
+    contentOps.push('/F1 9 Tf');
+    contentOps.push(`90 ${y} Td`);
+    contentOps.push(`(Posologie: ${escapePdf(item.dosage)}  |  Frequence: ${escapePdf(item.frequency)}  |  Duree: ${escapePdf(item.duration)}) Tj`);
+    contentOps.push('ET');
+
+    y -= 14;
+
     if (item.instructions) {
-      lines.push(`   Instructions: ${item.instructions}`);
+      contentOps.push('BT');
+      contentOps.push('/F1 9 Tf');
+      contentOps.push(`90 ${y} Td`);
+      contentOps.push(`(Instructions: ${escapePdf(item.instructions)}) Tj`);
+      contentOps.push('ET');
+      y -= 14;
     }
-    lines.push('');
+
+    y -= 10; // spacing between items
   }
 
-  // Notes
+  // ─── Notes section ───
   if (prescription.notes) {
-    lines.push('───────────────────────────────────────────────────────');
-    lines.push('NOTES');
-    lines.push('───────────────────────────────────────────────────────');
-    lines.push(prescription.notes);
-    lines.push('');
+    y -= 10;
+    contentOps.push('0.85 0.85 0.85 RG');
+    contentOps.push(`50 ${y} m 545 ${y} l S`);
+    contentOps.push('0 0 0 RG');
+    y -= 18;
+
+    contentOps.push('BT');
+    contentOps.push('/F2 10 Tf');
+    contentOps.push(`50 ${y} Td`);
+    contentOps.push('(Remarques:) Tj');
+    contentOps.push('ET');
+    y -= 16;
+
+    contentOps.push('BT');
+    contentOps.push('/F1 9 Tf');
+    contentOps.push(`70 ${y} Td`);
+    contentOps.push(`(${escapePdf(prescription.notes)}) Tj`);
+    contentOps.push('ET');
+    y -= 20;
   }
 
-  // QR code reference
-  lines.push('───────────────────────────────────────────────────────');
-  lines.push(`QR Code: ${qrCodeDataUrl.substring(0, 50)}...`);
-  lines.push(`Generated: ${generatedAt}`);
-  lines.push('═══════════════════════════════════════════════════════');
+  // ─── Signature section ───
+  y = Math.min(y - 30, 150);
+  contentOps.push('0.85 0.85 0.85 RG');
+  contentOps.push(`50 ${y + 10} m 545 ${y + 10} l S`);
+  contentOps.push('0 0 0 RG');
 
-  return lines.join('\n');
+  contentOps.push('BT');
+  contentOps.push('/F1 9 Tf');
+  contentOps.push(`380 ${y - 10} Td`);
+  contentOps.push('(Signature et cachet du medecin:) Tj');
+  contentOps.push('ET');
+
+  contentOps.push('BT');
+  contentOps.push('/F1 9 Tf');
+  contentOps.push(`380 ${y - 50} Td`);
+  contentOps.push(`(Dr. ${escapePdf(doctorName)}) Tj`);
+  contentOps.push('ET');
+
+  // ─── Footer ───
+  contentOps.push('BT');
+  contentOps.push('/F1 7 Tf');
+  contentOps.push('0.5 0.5 0.5 rg');
+  contentOps.push('50 30 Td');
+  contentOps.push(`(Document genere le ${new Date().toLocaleDateString('fr-FR')} - Ref: ${prescription.id.substring(0, 8)}) Tj`);
+  contentOps.push('0 0 0 rg');
+  contentOps.push('ET');
+
+  const streamContent = contentOps.join('\n');
+  const streamLength = Buffer.byteLength(streamContent, 'latin1');
+
+  const offsets: number[] = [];
+  let output = '%PDF-1.4\n';
+
+  // Object 1: Catalog
+  offsets.push(Buffer.byteLength(output, 'latin1'));
+  output += '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n';
+
+  // Object 2: Pages
+  offsets.push(Buffer.byteLength(output, 'latin1'));
+  output += '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n';
+
+  // Object 3: Page
+  offsets.push(Buffer.byteLength(output, 'latin1'));
+  output += '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>\nendobj\n';
+
+  // Object 4: Content stream
+  offsets.push(Buffer.byteLength(output, 'latin1'));
+  output += `4 0 obj\n<< /Length ${streamLength} >>\nstream\n${streamContent}\nendstream\nendobj\n`;
+
+  // Object 5: Regular font (Helvetica)
+  offsets.push(Buffer.byteLength(output, 'latin1'));
+  output += '5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n';
+
+  // Object 6: Bold font (Helvetica-Bold)
+  offsets.push(Buffer.byteLength(output, 'latin1'));
+  output += '6 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>\nendobj\n';
+
+  // Cross-reference table
+  const xrefOffset = Buffer.byteLength(output, 'latin1');
+  output += 'xref\n';
+  output += `0 ${offsets.length + 1}\n`;
+  output += '0000000000 65535 f \n';
+  for (const offset of offsets) {
+    output += `${String(offset).padStart(10, '0')} 00000 n \n`;
+  }
+
+  // Trailer
+  output += 'trailer\n';
+  output += `<< /Size ${offsets.length + 1} /Root 1 0 R >>\n`;
+  output += 'startxref\n';
+  output += `${xrefOffset}\n`;
+  output += '%%EOF\n';
+
+  return Buffer.from(output, 'latin1');
+}
+
+/**
+ * Escapes special PDF string characters.
+ */
+function escapePdf(text: string): string {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
 }

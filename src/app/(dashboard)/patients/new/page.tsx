@@ -42,6 +42,8 @@ function validateForm(data: PatientFormData): FieldErrors {
   }
   if (!data.phoneNumber.trim()) {
     errors.phoneNumber = 'Phone number is required';
+  } else if (!/^\d{9}$/.test(data.phoneNumber.replace(/\s/g, ''))) {
+    errors.phoneNumber = 'Enter 9 digits (e.g. 666634326)';
   }
   if (!data.gender) {
     errors.gender = 'Gender is required';
@@ -130,12 +132,12 @@ export default function NewPatientPage() {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         dateOfBirth: formData.dateOfBirth,
-        phoneNumber: formData.phoneNumber.trim(),
+        phoneNumber: `+212${formData.phoneNumber.trim()}`,
         gender: formData.gender,
       };
 
       if (formData.secondaryPhone.trim()) {
-        payload.secondaryPhone = formData.secondaryPhone.trim();
+        payload.secondaryPhone = `+212${formData.secondaryPhone.trim()}`;
       }
       if (formData.cinNumber.trim()) {
         payload.cinNumber = formData.cinNumber.trim();
@@ -286,17 +288,27 @@ export default function NewPatientPage() {
               required
               error={errors.phoneNumber}
             >
-              <input
-                id="phoneNumber"
-                type="tel"
-                value={formData.phoneNumber}
-                onChange={(e) => handleChange('phoneNumber', e.target.value)}
-                className={inputClassName(errors.phoneNumber)}
-                placeholder="e.g. +212 6XX XXX XXX"
-                aria-required="true"
-                aria-invalid={!!errors.phoneNumber}
-                aria-describedby={errors.phoneNumber ? 'phoneNumber-error' : undefined}
-              />
+              <div className="flex">
+                <span className="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-600">
+                  +212
+                </span>
+                <input
+                  id="phoneNumber"
+                  type="tel"
+                  value={formData.phoneNumber}
+                  onChange={(e) => {
+                    // Only allow digits
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 9);
+                    handleChange('phoneNumber', val);
+                  }}
+                  className={`${inputClassName(errors.phoneNumber)} rounded-l-none`}
+                  placeholder="666634326"
+                  maxLength={9}
+                  aria-required="true"
+                  aria-invalid={!!errors.phoneNumber}
+                  aria-describedby={errors.phoneNumber ? 'phoneNumber-error' : undefined}
+                />
+              </div>
             </FormField>
 
             {/* Gender */}
@@ -340,14 +352,23 @@ export default function NewPatientPage() {
               label="Secondary Phone"
               error={errors.secondaryPhone}
             >
-              <input
-                id="secondaryPhone"
-                type="tel"
-                value={formData.secondaryPhone}
-                onChange={(e) => handleChange('secondaryPhone', e.target.value)}
-                className={inputClassName(errors.secondaryPhone)}
-                placeholder="e.g. +212 5XX XXX XXX"
-              />
+              <div className="flex">
+                <span className="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-600">
+                  +212
+                </span>
+                <input
+                  id="secondaryPhone"
+                  type="tel"
+                  value={formData.secondaryPhone}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 9);
+                    handleChange('secondaryPhone', val);
+                  }}
+                  className={`${inputClassName(errors.secondaryPhone)} rounded-l-none`}
+                  placeholder="5XXXXXXXX"
+                  maxLength={9}
+                />
+              </div>
             </FormField>
 
             {/* CIN Number */}

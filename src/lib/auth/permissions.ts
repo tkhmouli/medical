@@ -57,6 +57,7 @@ export const PERMISSION_MATRIX: Record<Role, Set<Feature>> = {
   Medical_Assistant: new Set<Feature>([
     'patient_management',
     'appointments',
+    'medications',
     'reminders',
   ]),
 };

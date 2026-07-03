@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { RoleGate } from '@/components/RoleGate';
+import { FloatingStatusBar } from '@/components/FloatingStatusBar';
 import type { Role } from '@/lib/auth/permissions';
 
 interface UserInfo {
@@ -89,6 +90,15 @@ function FinancialIcon() {
   );
 }
 
+/** Workspace icon */
+function WorkspaceIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+    </svg>
+  );
+}
+
 /** Users icon */
 function UsersIcon() {
   return (
@@ -118,9 +128,12 @@ function CloseIcon() {
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Dashboard', icon: <DashboardIcon /> },
+  { href: '/workspace', label: 'Workspace', icon: <WorkspaceIcon /> },
   { href: '/patients', label: 'Patients', icon: <PatientsIcon />, feature: 'patient_management' },
   { href: '/appointments', label: 'Appointments', icon: <AppointmentsIcon />, feature: 'appointments' },
   { href: '/prescriptions', label: 'Prescriptions', icon: <PrescriptionsIcon />, feature: 'prescriptions' },
+  { href: '/lab-requests', label: 'Lab Requests', icon: <PrescriptionsIcon />, feature: 'prescriptions' },
+  { href: '/compte-rendu', label: 'Compte Rendu', icon: <WorkspaceIcon />, feature: 'prescriptions' },
   { href: '/medications', label: 'Medications', icon: <MedicationsIcon />, feature: 'medications' },
   { href: '/reminders', label: 'Reminders', icon: <RemindersIcon />, feature: 'reminders' },
   { href: '/financial', label: 'Financial', icon: <FinancialIcon />, feature: 'financial' },
@@ -185,14 +198,14 @@ export function AppShell({ user, children }: AppShellProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r theme-border theme-bg-sidebar transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Sidebar navigation"
       >
         {/* Sidebar header */}
-        <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
-          <span className="text-lg font-semibold text-gray-900">Clinic Platform</span>
+        <div className="flex h-16 items-center justify-between border-b theme-border px-4">
+          <span className="text-lg font-semibold theme-text-primary">Clinic Platform</span>
           <button
             type="button"
             className="rounded-md p-1 text-gray-500 hover:text-gray-700 lg:hidden"
@@ -211,37 +224,48 @@ export function AppShell({ user, children }: AppShellProps) {
         </nav>
 
         {/* User info footer */}
-        <div className="border-t border-gray-200 px-4 py-3">
+        <div className="border-t theme-border px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-700">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full theme-bg-tertiary text-sm font-medium theme-text-secondary">
               {user.name.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-gray-900">{user.name}</p>
-              <p className="truncate text-xs text-gray-600">{user.role.replace('_', ' ')}</p>
+              <p className="truncate text-sm font-medium theme-text-primary">{user.name}</p>
+              <p className="truncate text-xs theme-text-muted">{user.role.replace('_', ' ')}</p>
             </div>
           </div>
+          <form action="/api/auth/logout" method="POST" className="mt-3">
+            <button
+              type="submit"
+              className="w-full rounded-md border theme-border px-3 py-1.5 text-sm font-medium theme-text-secondary hover:theme-bg-tertiary transition-colors"
+            >
+              Sign out
+            </button>
+          </form>
         </div>
       </aside>
 
       {/* Main content area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar with menu toggle */}
-        <header className="flex h-16 items-center border-b border-gray-200 px-4 lg:hidden">
+        <header className="flex h-16 items-center border-b theme-border px-4 lg:hidden">
           <button
             type="button"
-            className="rounded-md p-2 text-gray-500 hover:text-gray-700"
+            className="rounded-md p-2 theme-text-secondary hover:theme-text-primary"
             onClick={() => setSidebarOpen(true)}
             aria-label="Open sidebar"
           >
             <MenuIcon />
           </button>
-          <span className="ml-3 text-lg font-semibold text-gray-900">Clinic Platform</span>
+          <span className="ml-3 text-lg font-semibold theme-text-primary">Clinic Platform</span>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
+        <main className="flex-1 overflow-y-auto theme-bg-secondary">
+          <FloatingStatusBar />
+          <div className="p-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>
