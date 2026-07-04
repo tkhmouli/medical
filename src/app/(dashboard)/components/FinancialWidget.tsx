@@ -85,39 +85,36 @@ export default function FinancialWidget() {
 
   // Success state
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-gray-700">Financial Overview</h3>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* YTD Revenue */}
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-          <p className="text-sm font-medium text-emerald-700">YTD Revenue</p>
-          <p className="mt-2 text-2xl font-bold text-emerald-900">
-            {formatCurrency(financials.ytdRevenue)}
-          </p>
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <h3 className="text-sm font-semibold text-gray-900 mb-4">Financial Overview</h3>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-3">
+          <div>
+            <p className="text-xs text-emerald-600">YTD Revenue</p>
+            <p className="text-lg font-bold text-emerald-800">{formatCurrency(financials.ytdRevenue)}</p>
+          </div>
+          <span className="text-xl">💰</span>
         </div>
-
-        {/* Monthly Revenue */}
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-          <p className="text-sm font-medium text-emerald-700">Monthly Revenue</p>
-          <p className="mt-2 text-2xl font-bold text-emerald-900">
-            {formatCurrency(financials.monthlyRevenue)}
-          </p>
+        <div className="flex items-center justify-between rounded-lg bg-blue-50 px-4 py-3">
+          <div>
+            <p className="text-xs text-blue-600">This Month</p>
+            <p className="text-lg font-bold text-blue-800">{formatCurrency(financials.monthlyRevenue)}</p>
+          </div>
+          <span className="text-xl">📊</span>
         </div>
-
-        {/* Weekly Revenue */}
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-          <p className="text-sm font-medium text-emerald-700">Weekly Revenue</p>
-          <p className="mt-2 text-2xl font-bold text-emerald-900">
-            {formatCurrency(financials.weeklyRevenue)}
-          </p>
+        <div className="flex items-center justify-between rounded-lg bg-violet-50 px-4 py-3">
+          <div>
+            <p className="text-xs text-violet-600">This Week</p>
+            <p className="text-lg font-bold text-violet-800">{formatCurrency(financials.weeklyRevenue)}</p>
+          </div>
+          <span className="text-xl">📈</span>
         </div>
-
-        {/* YTD Patients Seen */}
-        <div className="rounded-lg border border-violet-200 bg-violet-50 p-4">
-          <p className="text-sm font-medium text-violet-700">YTD Patients Seen</p>
-          <p className="mt-2 text-2xl font-bold text-violet-900">
-            {financials.ytdPatientsSeen.toLocaleString()}
-          </p>
+        <div className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3">
+          <div>
+            <p className="text-xs text-gray-600">YTD Patients</p>
+            <p className="text-lg font-bold text-gray-800">{financials.ytdPatientsSeen.toLocaleString()}</p>
+          </div>
+          <span className="text-xl">👥</span>
         </div>
       </div>
     </div>

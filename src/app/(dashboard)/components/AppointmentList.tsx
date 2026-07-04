@@ -133,26 +133,42 @@ export default function AppointmentList({
 }: AppointmentListProps) {
   if (appointments.length === 0) {
     return (
-      <p className="py-6 text-center text-sm text-gray-500">{emptyMessage}</p>
+      <p className="py-8 text-center text-sm text-gray-400">{emptyMessage}</p>
     );
   }
 
   return (
-    <ul className="divide-y divide-gray-100" role="list">
+    <ul className="divide-y divide-gray-50" role="list">
       {appointments.map((appointment) => (
         <li
           key={appointment.id}
-          className="flex items-center justify-between gap-x-4 px-3 py-3"
+          className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50/50 transition-colors"
         >
+          {/* Time */}
+          <div className="w-16 shrink-0 text-center">
+            <p className="text-sm font-semibold text-gray-900">{formatStartTime(appointment.startTime)}</p>
+          </div>
+
+          {/* Color accent line */}
+          <div className={`w-1 h-10 rounded-full ${
+            appointment.status === 'completed' ? 'bg-green-400' :
+            appointment.status === 'in_progress' ? 'bg-blue-400' :
+            appointment.status === 'waiting' ? 'bg-amber-400' :
+            'bg-gray-200'
+          }`} />
+
+          {/* Patient info */}
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-gray-900 truncate">
               {appointment.patientName}
             </p>
-            <p className="mt-0.5 text-xs text-gray-500">
-              {formatStartTime(appointment.startTime)} · {formatDuration(appointment.duration)} · {appointment.visitType}
+            <p className="text-xs text-gray-500">
+              {appointment.visitType} · {formatDuration(appointment.duration)}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Status + Actions */}
+          <div className="flex items-center gap-2 shrink-0">
             {showStatus && (
               <StatusBadge status={appointment.status} />
             )}
