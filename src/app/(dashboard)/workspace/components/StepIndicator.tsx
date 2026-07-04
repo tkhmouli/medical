@@ -21,6 +21,18 @@ const STEP_LABELS: Record<WorkflowStep, string> = {
   pdf: 'PDF',
 };
 
+const STEP_ICONS: Record<WorkflowStep, string> = {
+  patient: '👤',
+  appointment: '📅',
+  vitals: '🫀',
+  history: '📖',
+  visit_notes: '📝',
+  prescription: '💊',
+  lab_request: '🧪',
+  compte_rendu: '📋',
+  pdf: '📄',
+};
+
 export default function StepIndicator({
   steps,
   activeStep,
@@ -28,59 +40,76 @@ export default function StepIndicator({
   onStepClick,
 }: StepIndicatorProps) {
   return (
-    <nav aria-label="Workflow progress" className="w-full py-4">
-      <div className="flex items-center">
-        {steps.map((step, index) => {
-          const status = getStepStatus(step, activeStep, completedSteps);
-          const stepNumber = index + 1;
-          const isLast = index === steps.length - 1;
+    <nav aria-label="Workflow progress" className="w-full">
+      <div className="rounded-xl border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm px-3 py-3">
+        <div className="flex items-center">
+          {steps.map((step, index) => {
+            const status = getStepStatus(step, activeStep, completedSteps);
+            const isLast = index === steps.length - 1;
 
-          return (
-            <div key={step} className="flex items-center flex-1 last:flex-none">
-              {/* Step button */}
-              <button
-                type="button"
-                onClick={() => onStepClick(step)}
-                aria-current={status === 'current' ? 'step' : undefined}
-                aria-label={`Step ${stepNumber}: ${STEP_LABELS[step]}`}
-                className="flex flex-col items-center gap-1 p-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md shrink-0"
-              >
-                <span
-                  className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium transition-all ${
-                    status === 'completed'
-                      ? 'bg-green-600 text-white'
-                      : status === 'current'
-                      ? 'bg-blue-100 text-blue-700 border-2 border-blue-600 font-bold'
-                      : 'bg-gray-100 text-gray-500 border-2 border-gray-300'
+            return (
+              <div key={step} className="flex items-center flex-1 last:flex-none">
+                {/* Step button */}
+                <button
+                  type="button"
+                  onClick={() => onStepClick(step)}
+                  aria-current={status === 'current' ? 'step' : undefined}
+                  aria-label={`Step ${index + 1}: ${STEP_LABELS[step]}`}
+                  className={`group flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg shrink-0 transition-all duration-200 ${
+                    status === 'current'
+                      ? 'bg-blue-50 scale-105'
+                      : status === 'completed'
+                      ? 'hover:bg-green-50'
+                      : 'hover:bg-gray-50'
                   }`}
                 >
-                  {status === 'completed' ? '✓' : stepNumber}
-                </span>
-                <span
-                  className={`text-[10px] lg:text-xs text-center leading-tight hidden sm:block ${
-                    status === 'completed'
-                      ? 'text-green-700 font-medium'
-                      : status === 'current'
-                      ? 'text-blue-700 font-bold'
-                      : 'text-gray-400'
-                  }`}
-                >
-                  {STEP_LABELS[step]}
-                </span>
-              </button>
+                  <span
+                    className={`flex items-center justify-center w-9 h-9 rounded-full text-sm font-medium transition-all duration-200 ${
+                      status === 'completed'
+                        ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-sm shadow-emerald-200'
+                        : status === 'current'
+                        ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-md shadow-blue-200 ring-4 ring-blue-100'
+                        : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200 group-hover:text-gray-600'
+                    }`}
+                  >
+                    {status === 'completed' ? (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    ) : (
+                      <span className="text-sm">{STEP_ICONS[step]}</span>
+                    )}
+                  </span>
+                  <span
+                    className={`text-[10px] lg:text-[11px] text-center leading-tight hidden sm:block font-medium tracking-tight ${
+                      status === 'completed'
+                        ? 'text-emerald-700'
+                        : status === 'current'
+                        ? 'text-blue-700 font-semibold'
+                        : 'text-gray-400 group-hover:text-gray-600'
+                    }`}
+                  >
+                    {STEP_LABELS[step]}
+                  </span>
+                </button>
 
-              {/* Connector line AFTER step (not on last) */}
-              {!isLast && (
-                <div
-                  className={`h-0.5 flex-1 mx-1 ${
-                    completedSteps.has(step) ? 'bg-green-500' : 'bg-gray-200'
-                  }`}
-                  aria-hidden="true"
-                />
-              )}
-            </div>
-          );
-        })}
+                {/* Connector line */}
+                {!isLast && (
+                  <div className="flex-1 mx-1 h-[2px] relative">
+                    <div className="absolute inset-0 rounded-full bg-gray-100" />
+                    <div
+                      className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
+                        completedSteps.has(step)
+                          ? 'w-full bg-gradient-to-r from-emerald-400 to-emerald-500'
+                          : 'w-0'
+                      }`}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

@@ -126,10 +126,10 @@ export function CompteRenduStep({ state, dispatch, user }: CompteRenduStepProps)
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
       {/* Header with icon */}
       <div className="flex items-center gap-3">
-        <span className="text-2xl">📋</span>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-xl">📋</div>
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Compte Rendu</h2>
           <p className="text-sm text-gray-500">Visit summary — auto-saved. Use references below while writing.</p>
@@ -220,9 +220,9 @@ export function CompteRenduStep({ state, dispatch, user }: CompteRenduStepProps)
           type="button"
           onClick={handleGeneratePdf}
           disabled={!text.trim() || generatingPdf}
-          className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-emerald-200 hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:shadow-none transition-all"
         >
-          {generatingPdf ? 'Generating...' : '🖨️ Print Compte Rendu'}
+          🖨️ {generatingPdf ? 'Generating...' : 'Print Compte Rendu'}
         </button>
       </div>
     </div>
