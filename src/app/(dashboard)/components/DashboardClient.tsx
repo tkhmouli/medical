@@ -152,7 +152,128 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
         </div>
 
         {/* Right column — Sidebar widgets (1/3 width) */}
-        <div className="space-y-6">
+        <div className="space-y-5">
+          {/* Mini Calendar */}
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-900">
+                {new Date().toLocaleDateString([], { month: 'long', year: 'numeric' })}
+              </h3>
+              <div className="flex items-center gap-1">
+                <button type="button" className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                </button>
+                <button type="button" className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                </button>
+              </div>
+            </div>
+            {/* Calendar grid */}
+            <div className="grid grid-cols-7 gap-0.5 text-center">
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                <span key={i} className="text-[10px] font-medium text-gray-400 py-1">{d}</span>
+              ))}
+              {(() => {
+                const today = new Date();
+                const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+                const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                const cells = [];
+                for (let i = 0; i < firstDay; i++) cells.push(<span key={`e${i}`} />);
+                for (let d = 1; d <= daysInMonth; d++) {
+                  const isToday = d === today.getDate();
+                  cells.push(
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => {
+                        const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                        handleDateChange(dateStr);
+                      }}
+                      className={`text-xs py-1 rounded-md transition-colors ${isToday ? 'bg-blue-600 text-white font-bold' : 'text-gray-700 hover:bg-blue-50'}`}
+                    >
+                      {d}
+                    </button>
+                  );
+                }
+                return cells;
+              })()}
+            </div>
+          </div>
+
+          {/* Today's Schedule (sidebar) */}
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+              <h3 className="text-sm font-semibold text-gray-900">Today&apos;s Schedule</h3>
+              <Link href="/appointments" className="text-[10px] font-medium text-blue-600">View Full Calendar →</Link>
+            </div>
+            <div className="p-3 space-y-2 max-h-64 overflow-y-auto">
+              {stats.today.length === 0 ? (
+                <p className="text-xs text-gray-400 text-center py-4">No appointments today</p>
+              ) : (
+                stats.today.slice(0, 5).map((appt) => (
+                  <div key={appt.id} className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-gray-50">
+                    <div className={`w-0.5 h-8 rounded-full ${
+                      appt.status === 'completed' ? 'bg-green-400' :
+                      appt.status === 'in_progress' ? 'bg-blue-400' :
+                      appt.status === 'waiting' ? 'bg-amber-400' : 'bg-gray-200'
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-900 truncate">{appt.patientName}</p>
+                      <p className="text-[10px] text-gray-500">{appt.visitType}</p>
+                    </div>
+                    <span className={`text-[10px] font-medium rounded-full px-2 py-0.5 ${
+                      appt.status === 'completed' ? 'bg-green-100 text-green-700' :
+                      appt.status === 'waiting' ? 'bg-amber-100 text-amber-700' :
+                      appt.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {appt.status === 'completed' ? 'Done' :
+                       appt.status === 'waiting' ? 'Waiting' :
+                       appt.status === 'in_progress' ? 'Active' : 'Scheduled'}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+              <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+              <span className="text-[10px] font-medium text-blue-600 cursor-pointer">View all</span>
+            </div>
+            <div className="p-3 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 shrink-0">
+                  <span className="text-xs">🧪</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-800">Lab results pending review</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">2 reports awaiting</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 shrink-0">
+                  <span className="text-xs">📅</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-800">New appointment request</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">From patient portal</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-green-100 shrink-0">
+                  <span className="text-xs">💊</span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-800">Prescription renewal due</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">3 patients pending</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Quick Links */}
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Quick Links</h3>
@@ -191,15 +312,12 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
             </div>
             <div className="flex items-center justify-center py-3">
               <div className="relative h-28 w-28">
-                {/* Simple donut visualization */}
                 <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
                   <circle cx="18" cy="18" r="14" fill="none" stroke="#f3f4f6" strokeWidth="3" />
                   {stats.today.length > 0 && (
                     <>
-                      {/* Completed arc */}
                       <circle cx="18" cy="18" r="14" fill="none" stroke="#10b981" strokeWidth="3"
                         strokeDasharray={`${(stats.seenCount / stats.today.length) * 88} 88`} strokeLinecap="round" />
-                      {/* Waiting arc */}
                       <circle cx="18" cy="18" r="14" fill="none" stroke="#f59e0b" strokeWidth="3"
                         strokeDasharray={`${(stats.waitingCount / stats.today.length) * 88} 88`}
                         strokeDashoffset={`-${(stats.seenCount / stats.today.length) * 88}`} strokeLinecap="round" />
@@ -212,33 +330,23 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
                 </div>
               </div>
             </div>
-            {/* Legend */}
             <div className="mt-3 space-y-2 text-xs">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                  <span className="text-gray-600">Waiting</span>
-                </div>
+                <div className="flex items-center gap-2"><div className="h-2.5 w-2.5 rounded-full bg-amber-400" /><span className="text-gray-600">Waiting</span></div>
                 <span className="font-medium text-gray-900">{stats.waitingCount}</span>
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 rounded-full bg-blue-500" />
-                  <span className="text-gray-600">In Consultation</span>
-                </div>
+                <div className="flex items-center gap-2"><div className="h-2.5 w-2.5 rounded-full bg-blue-500" /><span className="text-gray-600">In Consultation</span></div>
                 <span className="font-medium text-gray-900">{stats.today.filter(a => a.status === 'in_progress').length}</span>
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-                  <span className="text-gray-600">Completed</span>
-                </div>
+                <div className="flex items-center gap-2"><div className="h-2.5 w-2.5 rounded-full bg-green-500" /><span className="text-gray-600">Completed</span></div>
                 <span className="font-medium text-gray-900">{stats.seenCount}</span>
               </div>
             </div>
           </div>
 
-          {/* Date Picker */}
+          {/* View Schedule Picker */}
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-gray-900 mb-3">View Schedule</h3>
             <input
