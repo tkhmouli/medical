@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -88,10 +87,7 @@ export function FloatingStatusBar() {
             <span className="text-xs text-green-600">seen today</span>
           </div>
 
-          {/* Theme Switcher */}
-          <div className="ml-2 border-l theme-border pl-3">
-            <ThemeSwitcher />
-          </div>
+
         </div>
       </div>
     </div>

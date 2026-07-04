@@ -207,7 +207,7 @@ export default function LabRequestsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight text-gray-900">🧪 Lab Requests</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-gray-900">Lab Requests</h1>
 
       {/* Tabs */}
       <div className="mt-4 flex gap-1 border-b border-gray-200">

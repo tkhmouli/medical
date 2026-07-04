@@ -69,28 +69,76 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
 
   return (
     <div className="space-y-6">
-      {/* Greeting Card — MediCore gradient style */}
-      <div className="rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 p-8 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
-        <div className="absolute bottom-0 left-1/2 w-48 h-48 bg-white/5 rounded-full translate-y-1/2" />
-        <div className="relative z-10">
-          <p className="text-blue-100 text-lg">{greeting},</p>
-          <h1 className="text-3xl font-bold mt-1">Dr. {user.name}</h1>
-          <p className="mt-3 text-blue-100 text-sm max-w-md">
-            Here&apos;s what&apos;s happening in your practice today. Stay aware, stay ahead.
-          </p>
-          <div className="mt-4 flex items-center gap-4">
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5 backdrop-blur-sm">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-xs font-medium">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+      {/* Greeting Banner — MediCore light style with illustration + AI card */}
+      <div className="rounded-2xl bg-gradient-to-r from-blue-50 via-white to-blue-50 border border-blue-100 p-8 relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute top-4 right-1/3 w-32 h-32 bg-blue-100/40 rounded-full blur-2xl" />
+        <div className="absolute bottom-0 right-1/4 w-24 h-24 bg-indigo-100/30 rounded-full blur-xl" />
+        
+        <div className="relative z-10 flex items-center justify-between gap-6">
+          {/* Left — Greeting */}
+          <div className="flex-1">
+            <p className="text-lg text-gray-600 italic">{greeting},</p>
+            <h1 className="text-3xl font-bold text-blue-600 mt-1">Dr. {user.name}!</h1>
+            <p className="mt-3 text-sm text-gray-500">
+              Here&apos;s what&apos;s happening in your practice today.<br />Stay aware, stay ahead.
+            </p>
+            <div className="mt-4 flex items-center gap-4">
+              <div className="flex items-center gap-2 text-gray-600">
+                <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span className="text-xs font-medium">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+                <span className="text-xs font-medium">Urology Department</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-1.5 backdrop-blur-sm">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-              </svg>
-              <span className="text-xs font-medium">{new Date().toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+          </div>
+
+          {/* Center — Doctor illustration placeholder */}
+          <div className="hidden lg:flex items-end justify-center w-48">
+            <svg viewBox="0 0 200 220" className="w-40 h-44" fill="none">
+              {/* Simple doctor silhouette */}
+              <ellipse cx="100" cy="210" rx="60" ry="10" fill="#dbeafe" />
+              {/* Body - lab coat */}
+              <path d="M70 130 C70 110 80 95 100 95 C120 95 130 110 130 130 L135 200 L65 200 Z" fill="white" stroke="#93c5fd" strokeWidth="1.5" />
+              {/* Head */}
+              <circle cx="100" cy="70" r="28" fill="#fde68a" />
+              {/* Hair */}
+              <path d="M75 60 C75 40 125 40 125 60 C125 55 115 48 100 48 C85 48 75 55 75 60Z" fill="#1e3a5f" />
+              {/* Glasses */}
+              <circle cx="90" cy="68" r="8" fill="none" stroke="#374151" strokeWidth="1.5" />
+              <circle cx="110" cy="68" r="8" fill="none" stroke="#374151" strokeWidth="1.5" />
+              <line x1="98" y1="68" x2="102" y2="68" stroke="#374151" strokeWidth="1.5" />
+              {/* Stethoscope */}
+              <path d="M95 95 C85 105 85 115 90 120" fill="none" stroke="#6b7280" strokeWidth="2" />
+              <circle cx="90" cy="122" r="4" fill="#3b82f6" />
+              {/* Smile */}
+              <path d="M93 78 C96 82 104 82 107 78" fill="none" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" />
+              {/* Plant decoration */}
+              <path d="M145 180 C145 170 150 165 155 170 C160 165 165 170 165 180" fill="#86efac" />
+              <line x1="155" y1="180" x2="155" y2="200" stroke="#22c55e" strokeWidth="2" />
+            </svg>
+          </div>
+
+          {/* Right — AI Assistant card */}
+          <div className="hidden md:block w-64 shrink-0">
+            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100">
+                  <svg className="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
+                </div>
+                <span className="text-xs font-semibold text-gray-900">AI Clinical Assistant</span>
+                <span className="text-[9px] font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">BETA</span>
+              </div>
+              <p className="text-[11px] text-gray-500 mb-3">Your AI assistant for smarter clinical decisions and summaries.</p>
+              <div className="rounded-lg bg-gray-50 border border-gray-100 p-3 mb-3">
+                <p className="text-[11px] font-medium text-gray-800">AI Patient Summary Generator</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">Generate concise patient summaries with AI.</p>
+              </div>
+              <button type="button" className="w-full rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700 transition-colors">
+                Generate Summary
+              </button>
             </div>
           </div>
         </div>
@@ -154,7 +202,9 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
                 for (let i = 0; i < firstDay; i++) cells.push(<span key={`e${i}`} />);
                 for (let d = 1; d <= daysInMonth; d++) {
                   const isToday = d === today.getDate();
-                  cells.push(<button key={d} type="button" onClick={() => handleDateChange(`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`)} className={`text-xs py-1 rounded-md transition-colors ${isToday ? 'bg-blue-600 text-white font-bold' : 'text-gray-700 hover:bg-blue-50'}`}>{d}</button>);
+                  const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                  const isSelected = selectedDate === dateStr;
+                  cells.push(<button key={d} type="button" onClick={() => handleDateChange(dateStr)} className={`text-xs py-1 rounded-md transition-colors relative ${isSelected ? 'bg-blue-600 text-white font-bold' : isToday ? 'bg-blue-100 text-blue-700 font-bold' : 'text-gray-700 hover:bg-blue-50'}`}>{d}{isToday && isSelected ? '' : isToday && !isSelected ? <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-600" /> : null}</button>);
                 }
                 return cells;
               })()}
@@ -273,11 +323,7 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
             </div>
           </div>
 
-          {/* View Schedule */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">View Schedule</h3>
-            <input type="date" value={selectedDate ?? ''} onChange={(e) => handleDateChange(e.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-          </div>
+          {/* View Schedule — removed */}
         </div>
       </div>
     </div>

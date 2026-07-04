@@ -86,7 +86,9 @@ export function VitalsStep({ state, dispatch, user }: VitalsStepProps) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 text-lg">🫀</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50">
+          <svg className="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+        </div>
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Vital Signs</h2>
           <p className="text-sm text-gray-500">
@@ -101,19 +103,19 @@ export function VitalsStep({ state, dispatch, user }: VitalsStepProps) {
           <p className="text-xs font-semibold text-amber-700 mb-2">Previous Visit ({previousVitals.date})</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="flex items-center gap-2">
-              <span>❤️</span>
+              <span className="text-xs font-medium text-amber-700">BP</span>
               <span className="text-sm text-amber-900">{previousVitals.bloodPressure || '—'}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span>🌡️</span>
+              <span className="text-xs font-medium text-amber-700">Temp</span>
               <span className="text-sm text-amber-900">{previousVitals.temperatureC ? `${previousVitals.temperatureC}°C` : '—'}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span>⚖️</span>
+              <span className="text-xs font-medium text-amber-700">Wt</span>
               <span className="text-sm text-amber-900">{previousVitals.weightKg ? `${previousVitals.weightKg}kg` : '—'}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span>📏</span>
+              <span className="text-xs font-medium text-amber-700">Ht</span>
               <span className="text-sm text-amber-900">{previousVitals.heightCm ? `${previousVitals.heightCm}cm` : '—'}</span>
             </div>
           </div>
@@ -123,7 +125,7 @@ export function VitalsStep({ state, dispatch, user }: VitalsStepProps) {
       {/* Input fields */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-gray-700">❤️ Blood Pressure</label>
+          <label className="block text-sm font-medium text-gray-700">Blood Pressure</label>
           <input
             type="text"
             value={bloodPressure}
@@ -133,7 +135,7 @@ export function VitalsStep({ state, dispatch, user }: VitalsStepProps) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">🌡️ Temperature (°C)</label>
+          <label className="block text-sm font-medium text-gray-700">Temperature (°C)</label>
           <input
             type="text"
             value={temperatureC}
@@ -143,7 +145,7 @@ export function VitalsStep({ state, dispatch, user }: VitalsStepProps) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">⚖️ Weight (kg)</label>
+          <label className="block text-sm font-medium text-gray-700">Weight (kg)</label>
           <input
             type="number"
             value={weightKg}
@@ -153,7 +155,7 @@ export function VitalsStep({ state, dispatch, user }: VitalsStepProps) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">📏 Height (cm)</label>
+          <label className="block text-sm font-medium text-gray-700">Height (cm)</label>
           <input
             type="number"
             value={heightCm}

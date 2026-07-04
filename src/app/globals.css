@@ -7,8 +7,8 @@
 :root,
 [data-theme="light"] {
   --color-bg-primary: 255, 255, 255;
-  --color-bg-secondary: 249, 250, 251;
-  --color-bg-tertiary: 243, 244, 246;
+  --color-bg-secondary: 248, 250, 255;
+  --color-bg-tertiary: 241, 245, 249;
   --color-bg-sidebar: 255, 255, 255;
   --color-bg-panel: 255, 255, 255;
   --color-text-primary: 17, 24, 39;

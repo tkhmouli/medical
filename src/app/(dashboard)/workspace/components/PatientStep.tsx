@@ -381,13 +381,6 @@ function PatientStepActive({ state, dispatch, user, showToast }: PatientStepActi
 
   return (
     <div data-testid="patient-step" className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900">Patient Selection</h2>
-        <p className="mt-1 text-sm text-gray-600">
-          Search for an existing patient or register a new one.
-        </p>
-      </div>
-
       {/* If patient is confirmed, show confirmation instead of form */}
       {patientConfirmed ? (
         <div className="space-y-4">
@@ -413,58 +406,11 @@ function PatientStepActive({ state, dispatch, user, showToast }: PatientStepActi
         </div>
       ) : (
         <>
-          {/* Mode toggle — Search/Register always on top */}
-          <div className="flex rounded-lg border border-gray-200 p-1 bg-gray-50" role="tablist" aria-label="Patient mode">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'search'}
-              onClick={() => setMode('search')}
-              className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                mode === 'search'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Search Existing
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'register'}
-              onClick={() => setMode('register')}
-              className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                mode === 'register'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Register New
-            </button>
-          </div>
-
-          {/* Mode content */}
-          {mode === 'search' ? (
-            <SearchMode
-              searchError={searchError}
-              onPatientSelect={handlePatientSelect}
-            />
-          ) : (
-            <RegistrationForm
-              formData={formData}
-              fieldErrors={fieldErrors}
-              submitting={submitting}
-              registrationError={registrationError}
-              onFieldChange={handleFieldChange}
-              onSubmit={handleRegistrationSubmit}
-            />
-          )}
-
           {/* Today's Queue for Doctors */}
           {(user.role === 'Doctor' || user.role === 'Admin') && todayQueue.length > 0 && (
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <h3 className="text-sm font-semibold text-blue-800 mb-3">Today&apos;s Patients — Quick Select</h3>
-              <div className="space-y-2 max-h-60 overflow-y-auto">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Today&apos;s Patients</h3>
+              <div className="space-y-2 max-h-80 overflow-y-auto">
                 {todayQueue.map((item) => (
                   <button
                     key={item.id}
@@ -486,6 +432,12 @@ function PatientStepActive({ state, dispatch, user, showToast }: PatientStepActi
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+          {(user.role === 'Doctor' || user.role === 'Admin') && !queueLoading && todayQueue.length === 0 && (
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center">
+              <p className="text-sm text-gray-500">No patients scheduled for today.</p>
+              <p className="text-xs text-gray-400 mt-1">Patients will appear here once appointments are booked.</p>
             </div>
           )}
           {queueLoading && (user.role === 'Doctor' || user.role === 'Admin') && (

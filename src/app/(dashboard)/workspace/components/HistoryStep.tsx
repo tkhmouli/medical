@@ -284,7 +284,9 @@ export default function HistoryStep({ state, dispatch, user }: HistoryStepProps)
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-lg">📖</div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+          <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Patient History</h2>
             <p className="text-sm text-gray-500">{totalCount} visit{totalCount !== 1 ? 's' : ''} on record</p>
@@ -300,7 +302,7 @@ export default function HistoryStep({ state, dispatch, user }: HistoryStepProps)
                 : 'bg-green-100 text-green-800'
             }`}
           >
-            {totalCount === 1 ? '🆕 First Visit' : '🔄 Returning'}
+            {totalCount === 1 ? 'First Visit' : 'Returning'}
           </span>
         )}
       </div>
@@ -308,7 +310,7 @@ export default function HistoryStep({ state, dispatch, user }: HistoryStepProps)
       {/* Empty state */}
       {visits.length === 0 && (
         <div className="mt-6 rounded-lg border-2 border-dashed border-gray-200 p-8 text-center">
-          <span className="text-3xl">📋</span>
+          <svg className="w-8 h-8 text-gray-300 mx-auto" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
           <p className="mt-2 text-sm text-gray-500">No previous visits recorded</p>
         </div>
       )}
@@ -346,7 +348,7 @@ export default function HistoryStep({ state, dispatch, user }: HistoryStepProps)
                 {/* Notes */}
                 {visit.notes && (
                   <div className="mt-3 rounded-md bg-white/70 p-3">
-                    <p className="text-xs font-medium text-gray-600 mb-1">📝 Notes</p>
+                    <p className="text-xs font-medium text-gray-600 mb-1">Notes</p>
                     <p className="text-sm text-gray-800 whitespace-pre-wrap line-clamp-3">{visit.notes}</p>
                   </div>
                 )}
@@ -354,7 +356,7 @@ export default function HistoryStep({ state, dispatch, user }: HistoryStepProps)
                 {/* Prescriptions */}
                 {canSeePrescriptions && prescriptions.length > 0 && (
                   <div className="mt-2 rounded-md bg-white/70 p-3">
-                    <p className="text-xs font-medium text-gray-600 mb-1">💊 Medications</p>
+                    <p className="text-xs font-medium text-gray-600 mb-1">Medications</p>
                     <div className="flex flex-wrap gap-2">
                       {prescriptions.flatMap(rx => rx.items).map((item) => (
                         <span key={item.id} className="inline-flex items-center rounded-full bg-purple-50 border border-purple-200 px-2.5 py-0.5 text-xs text-purple-800">

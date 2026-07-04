@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { RoleGate } from '@/components/RoleGate';
-import { FloatingStatusBar } from '@/components/FloatingStatusBar';
 import { ChatWidget } from '@/components/ChatWidget';
 import type { Role } from '@/lib/auth/permissions';
 
@@ -287,7 +286,6 @@ export function AppShell({ user, children }: AppShellProps) {
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto theme-bg-secondary">
-          <FloatingStatusBar />
           <div className="p-6">
             {children}
           </div>
