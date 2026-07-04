@@ -132,14 +132,31 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-          Dashboard
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Welcome back, {user.name}
-        </p>
+      {/* Greeting Header — MediCore style */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'},
+            </h1>
+            <p className="text-2xl font-bold text-blue-600">
+              Dr. {user.name.split(' ').pop()} 👋
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              Here&apos;s what&apos;s happening in your practice today.
+            </p>
+          </div>
+          <div className="hidden md:flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
+            <div className="text-right">
+              <p className="text-sm font-medium text-gray-800">
+                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+              <p className="text-xs text-gray-500">
+                {new Date().toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Status Counters */}
@@ -154,37 +171,43 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
       </RoleGate>
 
       {/* Date Picker */}
-      <div className="flex items-center gap-3">
-        <label htmlFor="schedule-date" className="text-sm font-medium text-gray-700">
-          View schedule for:
-        </label>
-        <input
-          id="schedule-date"
-          type="date"
-          value={selectedDate ?? ''}
-          onChange={(e) => handleDateChange(e.target.value)}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-        {selectedDate && (
-          <button
-            onClick={handleClearDate}
-            className="rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-          >
-            Clear
-          </button>
-        )}
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <label htmlFor="schedule-date" className="text-sm font-medium text-gray-700">
+            View schedule for:
+          </label>
+          <input
+            id="schedule-date"
+            type="date"
+            value={selectedDate ?? ''}
+            onChange={(e) => handleDateChange(e.target.value)}
+            className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          {selectedDate && (
+            <button
+              onClick={handleClearDate}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Date-Picked Section */}
       {selectedDate && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-900">
-            Schedule for {formatSelectedDate(selectedDate)}
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Schedule for {formatSelectedDate(selectedDate)}
+            </h2>
+          </div>
           {isLoadingDate ? (
-            <p className="py-6 text-center text-sm text-gray-500">Loading schedule...</p>
+            <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
+              <p className="text-sm text-gray-500">Loading schedule...</p>
+            </div>
           ) : (
-            <div className="mt-3 rounded-lg border border-gray-200 bg-white">
+            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
               <AppointmentList
                 appointments={dateAppointments}
                 showStatus
@@ -198,8 +221,11 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
       {/* Today's Schedule */}
       {!selectedDate && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-900">Today&apos;s Schedule</h2>
-          <div className="mt-3 rounded-lg border border-gray-200 bg-white">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-gray-900">Today&apos;s Appointments</h2>
+            <span className="text-xs font-medium text-blue-600 hover:text-blue-700 cursor-pointer">View all →</span>
+          </div>
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
             <AppointmentList
               appointments={stats.today}
               showStatus
@@ -213,8 +239,10 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
       {/* Tomorrow's Schedule */}
       {!selectedDate && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-900">Tomorrow&apos;s Schedule</h2>
-          <div className="mt-3 rounded-lg border border-gray-200 bg-white">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-gray-900">Tomorrow&apos;s Schedule</h2>
+          </div>
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
             <AppointmentList
               appointments={stats.tomorrow}
               showStatus={false}

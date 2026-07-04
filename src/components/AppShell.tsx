@@ -161,15 +161,15 @@ export function AppShell({ user, children }: AppShellProps) {
     const linkContent = (
       <Link
         href={item.href}
-        className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
           active
-            ? 'bg-gray-100 text-gray-900'
-            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+            ? 'bg-blue-600 text-white shadow-sm'
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
         }`}
         onClick={() => setSidebarOpen(false)}
         aria-current={active ? 'page' : undefined}
       >
-        {item.icon}
+        <span className={active ? 'text-white' : 'text-gray-400'}>{item.icon}</span>
         <span>{item.label}</span>
       </Link>
     );
@@ -205,7 +205,14 @@ export function AppShell({ user, children }: AppShellProps) {
       >
         {/* Sidebar header */}
         <div className="flex h-16 items-center justify-between border-b theme-border px-4">
-          <span className="text-lg font-semibold theme-text-primary">Clinic Platform</span>
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </div>
+            <span className="text-lg font-bold text-gray-900">CareFlow</span>
+          </div>
           <button
             type="button"
             className="rounded-md p-1 text-gray-500 hover:text-gray-700 lg:hidden"
@@ -257,7 +264,14 @@ export function AppShell({ user, children }: AppShellProps) {
           >
             <MenuIcon />
           </button>
-          <span className="ml-3 text-lg font-semibold theme-text-primary">Clinic Platform</span>
+          <div className="ml-3 flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600">
+              <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </div>
+            <span className="text-lg font-bold text-gray-900">CareFlow</span>
+          </div>
         </header>
 
         {/* Page content */}

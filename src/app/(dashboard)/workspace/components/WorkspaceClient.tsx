@@ -25,6 +25,18 @@ import HistoryStep from './HistoryStep';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
+const STEP_META: Record<WorkflowStep, string> = {
+  patient: 'Patient Selection',
+  appointment: 'Appointment',
+  vitals: 'Vital Signs',
+  history: 'Visit History',
+  visit_notes: 'Visit Notes',
+  prescription: 'Prescription',
+  lab_request: 'Lab Request',
+  compte_rendu: 'Summary (CR)',
+  pdf: 'Export PDF',
+};
+
 export interface WorkspaceClientProps {
   user: {
     id: string;
@@ -279,10 +291,85 @@ export function WorkspaceClient({ user }: WorkspaceClientProps) {
         </div>
       )}
 
-      {/* Active step panel */}
-      <main className="min-h-[400px]">
-        {renderStepPanel()}
-      </main>
+      {/* Active step panel with sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Main step content */}
+        <main className="lg:col-span-3 min-h-[400px]">
+          {renderStepPanel()}
+        </main>
+
+        {/* Right sidebar — Quick Links + Context */}
+        <aside className="space-y-4">
+          {/* Quick Links */}
+          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Links</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <a href="/patients" className="flex flex-col items-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 p-3 hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <span className="text-lg">👤</span>
+                <span className="text-[10px] font-medium text-gray-600">Patients</span>
+              </a>
+              <a href="/appointments" className="flex flex-col items-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 p-3 hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <span className="text-lg">📅</span>
+                <span className="text-[10px] font-medium text-gray-600">Appts</span>
+              </a>
+              <a href="/prescriptions" className="flex flex-col items-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 p-3 hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <span className="text-lg">💊</span>
+                <span className="text-[10px] font-medium text-gray-600">Rx</span>
+              </a>
+              <a href="/lab-requests" className="flex flex-col items-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 p-3 hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <span className="text-lg">🧪</span>
+                <span className="text-[10px] font-medium text-gray-600">Lab</span>
+              </a>
+              <a href="/compte-rendu" className="flex flex-col items-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 p-3 hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <span className="text-lg">📋</span>
+                <span className="text-[10px] font-medium text-gray-600">CR</span>
+              </a>
+              <a href="/financial" className="flex flex-col items-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50 p-3 hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <span className="text-lg">💰</span>
+                <span className="text-[10px] font-medium text-gray-600">Finance</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Encounter Progress */}
+          {state.patient && (
+            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Encounter Progress</h3>
+              <div className="space-y-2">
+                {visibleSteps.map((step, idx) => {
+                  const isCompleted = state.completedSteps.has(step);
+                  const isCurrent = state.activeStep === step;
+                  return (
+                    <div key={step} className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${isCompleted ? 'bg-green-500' : isCurrent ? 'bg-blue-500' : 'bg-gray-200'}`} />
+                      <span className={`text-xs ${isCompleted ? 'text-green-700' : isCurrent ? 'text-blue-700 font-medium' : 'text-gray-400'}`}>
+                        {STEP_META[step]}
+                      </span>
+                      {isCompleted && <span className="ml-auto text-[10px] text-green-600 font-medium">Done</span>}
+                      {isCurrent && <span className="ml-auto text-[10px] text-blue-600 font-medium">Current</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Keyboard Shortcuts */}
+          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Shortcuts</h3>
+            <div className="space-y-2 text-xs text-gray-500">
+              <div className="flex items-center justify-between">
+                <span>Next step</span>
+                <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 font-mono text-[10px]">Ctrl+→</kbd>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Previous step</span>
+                <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 font-mono text-[10px]">Ctrl+←</kbd>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
 
       {/* Bottom navigation */}
       <div className="mt-6 flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-3 shadow-sm">
