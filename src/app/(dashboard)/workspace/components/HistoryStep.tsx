@@ -279,12 +279,12 @@ export default function HistoryStep({ state, dispatch, user }: HistoryStepProps)
   return (
     <div
       data-testid="step-panel-history"
-      className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+      className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-xl">📖</div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-lg">📖</div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Patient History</h2>
             <p className="text-sm text-gray-500">{totalCount} visit{totalCount !== 1 ? 's' : ''} on record</p>

@@ -142,7 +142,7 @@ export function WorkspaceClient({ user }: WorkspaceClientProps) {
         return (
           <div
             data-testid="step-panel-patient"
-            className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+            className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
           >
             <PatientStep state={state} dispatch={dispatch} user={user} />
           </div>
@@ -198,68 +198,68 @@ export function WorkspaceClient({ user }: WorkspaceClientProps) {
   const isLastStep = currentStepIndex === visibleSteps.length - 1;
 
   return (
-    <div className="mx-auto w-full max-w-7xl overflow-x-hidden px-4 py-8 md:px-6 lg:px-8">
-      {/* Header */}
-      <header className="mb-8">
+    <div className="mx-auto w-full max-w-7xl overflow-x-hidden px-4 py-6 md:px-6 lg:px-8">
+      {/* Greeting header */}
+      <header className="mb-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 shadow-lg shadow-blue-200/50">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Clinical Workspace</h1>
-              <p className="text-sm text-gray-500">
-                {state.patient
-                  ? `Step ${currentStepIndex + 1} of ${visibleSteps.length}`
-                  : 'Start by selecting a patient'
-                }
-              </p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Patient Workspace
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              {state.patient
+                ? `Encounter in progress · Step ${currentStepIndex + 1} of ${visibleSteps.length}`
+                : "Here's your clinical workflow. Start by selecting a patient."
+              }
+            </p>
           </div>
           {state.completedSteps.size > 0 && (
-            <div className="hidden sm:flex items-center gap-3">
-              <div className="flex items-center gap-2 rounded-full bg-gray-50 px-4 py-2 ring-1 ring-gray-100">
-                <div className="relative h-5 w-5">
-                  <svg className="h-5 w-5 -rotate-90" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="14" fill="none" stroke="#e5e7eb" strokeWidth="3" />
-                    <circle cx="18" cy="18" r="14" fill="none" stroke="url(#pg)" strokeWidth="3" strokeDasharray={`${(state.completedSteps.size / visibleSteps.length) * 88} 88`} strokeLinecap="round" />
-                    <defs><linearGradient id="pg"><stop offset="0%" stopColor="#3b82f6" /><stop offset="100%" stopColor="#10b981" /></linearGradient></defs>
-                  </svg>
-                </div>
-                <span className="text-xs font-semibold text-gray-700">{state.completedSteps.size}/{visibleSteps.length}</span>
-              </div>
+            <div className="flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-1.5">
+              <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+              <span className="text-xs font-semibold text-blue-700">{state.completedSteps.size}/{visibleSteps.length} completed</span>
             </div>
           )}
         </div>
       </header>
 
-      {/* Patient context card */}
+      {/* Patient info card — clean white with blue accent */}
       {state.patient && (
-        <div className="mb-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-5 text-white shadow-xl shadow-slate-300/20">
+        <div className="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm text-2xl font-bold ring-1 ring-white/20">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold text-lg">
                 {state.patient.firstName[0]}{state.patient.lastName[0]}
               </div>
               <div>
-                <h2 className="text-lg font-bold">{state.patient.firstName} {state.patient.lastName}</h2>
-                <div className="flex items-center gap-3 mt-1">
-                  {state.patient.dateOfBirth && <span className="text-sm text-slate-300">{calculateAge(state.patient.dateOfBirth)} yrs</span>}
-                  {state.patient.phoneNumber && <span className="text-sm text-slate-300">📞 {state.patient.phoneNumber}</span>}
+                <h2 className="text-lg font-bold text-gray-900">
+                  {state.patient.firstName} {state.patient.lastName}
+                </h2>
+                <div className="flex items-center gap-3 mt-0.5">
+                  {state.patient.dateOfBirth && (
+                    <span className="text-sm text-gray-500">{calculateAge(state.patient.dateOfBirth)} years</span>
+                  )}
+                  {state.patient.phoneNumber && (
+                    <span className="text-sm text-gray-500">{state.patient.phoneNumber}</span>
+                  )}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {state.appointment && (
-                <div className="hidden sm:block text-right rounded-xl bg-white/10 backdrop-blur-sm px-4 py-2 ring-1 ring-white/10">
-                  <p className="text-sm font-semibold">{state.appointment.startTime}</p>
-                  <p className="text-xs text-slate-300">{state.appointment.date} · {state.appointment.visitType.replace('_', ' ')}</p>
+                <div className="hidden sm:flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                  <div className="h-2 w-2 rounded-full bg-green-500" />
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-800">{state.appointment.startTime}</p>
+                    <p className="text-xs text-gray-500">{state.appointment.visitType.replace('_', ' ')}</p>
+                  </div>
                 </div>
               )}
-              <button type="button" onClick={() => dispatch({ type: 'RESET' })} className="rounded-xl bg-white/10 backdrop-blur-sm px-3 py-2 text-xs font-medium text-white/90 hover:bg-white/20 ring-1 ring-white/10 transition-all">
-                Switch
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'RESET' })}
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                Change Patient
               </button>
             </div>
           </div>
@@ -273,9 +273,9 @@ export function WorkspaceClient({ user }: WorkspaceClientProps) {
 
       {/* No patient warning */}
       {!state.patient && state.activeStep !== 'patient' && (
-        <div className="mb-6 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-5 py-4 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100">⚠️</div>
-          <p className="text-sm text-amber-800 font-medium">Select a patient first to proceed.</p>
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-sm">⚠️</div>
+          <p className="text-sm text-amber-800 font-medium">Please select a patient first to continue.</p>
         </div>
       )}
 
@@ -285,23 +285,25 @@ export function WorkspaceClient({ user }: WorkspaceClientProps) {
       </main>
 
       {/* Bottom navigation */}
-      <footer className="mt-8 flex items-center justify-between rounded-2xl bg-gray-50/80 backdrop-blur-sm px-6 py-4 ring-1 ring-gray-100">
+      <div className="mt-6 flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-3 shadow-sm">
         <button
           type="button"
           onClick={() => {
             if (currentStepIndex === 0) { dispatch({ type: 'RESET' }); }
             else { dispatch({ type: 'NAVIGATE_TO_STEP', payload: visibleSteps[currentStepIndex - 1] }); }
           }}
-          className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:shadow-md transition-all duration-200"
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
           {currentStepIndex === 0 ? 'Reset' : 'Back'}
         </button>
-        <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
-          <kbd className="rounded bg-gray-200 px-1.5 py-0.5 font-mono text-[10px] text-gray-500">Ctrl</kbd>
+
+        <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400">
+          <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 font-mono text-[10px] text-gray-500">Ctrl</kbd>
           <span>+</span>
-          <kbd className="rounded bg-gray-200 px-1.5 py-0.5 font-mono text-[10px] text-gray-500">←→</kbd>
+          <kbd className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 font-mono text-[10px] text-gray-500">← →</kbd>
         </div>
+
         {isLastStep ? (
           <button
             type="button"
@@ -319,7 +321,7 @@ export function WorkspaceClient({ user }: WorkspaceClientProps) {
                 Promise.all(savePromises).finally(() => { dispatch({ type: 'RESET' }); });
               } else { dispatch({ type: 'RESET' }); }
             }}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-200/50 hover:shadow-xl hover:from-emerald-600 hover:to-teal-600 transition-all duration-200"
+            className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
             Complete Encounter
@@ -329,13 +331,13 @@ export function WorkspaceClient({ user }: WorkspaceClientProps) {
             type="button"
             onClick={() => { if (!state.patient && state.activeStep === 'patient') return; dispatch({ type: 'ADVANCE_STEP', payload: { role: user.role } }); }}
             disabled={!state.patient && state.activeStep === 'patient'}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-200/50 hover:shadow-xl hover:from-blue-600 hover:to-violet-600 disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-200"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             Continue
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
           </button>
         )}
-      </footer>
+      </div>
     </div>
   );
 }

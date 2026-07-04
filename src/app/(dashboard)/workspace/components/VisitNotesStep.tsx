@@ -278,11 +278,11 @@ export default function VisitNotesStep({ state, dispatch, user }: VisitNotesStep
   return (
     <div
       data-testid="step-panel-visit-notes"
-      className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+      className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
     >
       {/* Title */}
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-xl">📝</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-lg">📝</div>
         <h2 className="text-lg font-semibold text-gray-900">{t.title}</h2>
       </div>
 

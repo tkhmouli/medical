@@ -113,9 +113,9 @@ export function LabRequestStep({ state, dispatch, user }: LabRequestStepProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-xl">🧪</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-50 text-lg">🧪</div>
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Lab Request</h2>
           <p className="text-sm text-gray-500">Select tests from templates or add custom. Optional step.</p>
@@ -191,7 +191,7 @@ export function LabRequestStep({ state, dispatch, user }: LabRequestStepProps) {
             type="button"
             onClick={handlePrint}
             disabled={generatingPdf}
-            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-emerald-200 hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:shadow-none transition-all"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
             🖨️ {generatingPdf ? 'Generating...' : 'Print Lab Request'}
           </button>
