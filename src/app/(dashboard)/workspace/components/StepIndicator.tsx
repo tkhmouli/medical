@@ -9,28 +9,16 @@ export interface StepIndicatorProps {
   onStepClick: (step: WorkflowStep) => void;
 }
 
-const STEP_LABELS: Record<WorkflowStep, string> = {
-  patient: 'Patient',
-  appointment: 'Appt',
-  vitals: 'Vitals',
-  history: 'History',
-  visit_notes: 'Notes',
-  prescription: 'Rx',
-  lab_request: 'Lab',
-  compte_rendu: 'CR',
-  pdf: 'PDF',
-};
-
-const STEP_ICONS: Record<WorkflowStep, string> = {
-  patient: '👤',
-  appointment: '📅',
-  vitals: '🫀',
-  history: '📖',
-  visit_notes: '📝',
-  prescription: '💊',
-  lab_request: '🧪',
-  compte_rendu: '📋',
-  pdf: '📄',
+const STEP_META: Record<WorkflowStep, { label: string; icon: string; color: string }> = {
+  patient: { label: 'Patient', icon: '👤', color: 'blue' },
+  appointment: { label: 'Appointment', icon: '📅', color: 'violet' },
+  vitals: { label: 'Vitals', icon: '🫀', color: 'rose' },
+  history: { label: 'History', icon: '📖', color: 'indigo' },
+  visit_notes: { label: 'Notes', icon: '📝', color: 'sky' },
+  prescription: { label: 'Prescription', icon: '💊', color: 'purple' },
+  lab_request: { label: 'Lab', icon: '🧪', color: 'cyan' },
+  compte_rendu: { label: 'Summary', icon: '📋', color: 'amber' },
+  pdf: { label: 'Export', icon: '📄', color: 'emerald' },
 };
 
 export default function StepIndicator({
@@ -39,77 +27,89 @@ export default function StepIndicator({
   completedSteps,
   onStepClick,
 }: StepIndicatorProps) {
+  const activeIndex = steps.indexOf(activeStep);
+  const progressPercent = steps.length > 1
+    ? (completedSteps.size / (steps.length - 1)) * 100
+    : 0;
+
   return (
     <nav aria-label="Workflow progress" className="w-full">
-      <div className="rounded-xl border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm px-3 py-3">
-        <div className="flex items-center">
-          {steps.map((step, index) => {
-            const status = getStepStatus(step, activeStep, completedSteps);
-            const isLast = index === steps.length - 1;
+      {/* Progress bar */}
+      <div className="mb-4 overflow-hidden rounded-full bg-gray-100 h-1.5">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-emerald-500 transition-all duration-700 ease-out"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
 
-            return (
-              <div key={step} className="flex items-center flex-1 last:flex-none">
-                {/* Step button */}
-                <button
-                  type="button"
-                  onClick={() => onStepClick(step)}
-                  aria-current={status === 'current' ? 'step' : undefined}
-                  aria-label={`Step ${index + 1}: ${STEP_LABELS[step]}`}
-                  className={`group flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg shrink-0 transition-all duration-200 ${
-                    status === 'current'
-                      ? 'bg-blue-50 scale-105'
-                      : status === 'completed'
-                      ? 'hover:bg-green-50'
-                      : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <span
-                    className={`flex items-center justify-center w-9 h-9 rounded-full text-sm font-medium transition-all duration-200 ${
-                      status === 'completed'
-                        ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-sm shadow-emerald-200'
-                        : status === 'current'
-                        ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-md shadow-blue-200 ring-4 ring-blue-100'
-                        : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200 group-hover:text-gray-600'
-                    }`}
-                  >
-                    {status === 'completed' ? (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                      </svg>
-                    ) : (
-                      <span className="text-sm">{STEP_ICONS[step]}</span>
-                    )}
-                  </span>
-                  <span
-                    className={`text-[10px] lg:text-[11px] text-center leading-tight hidden sm:block font-medium tracking-tight ${
-                      status === 'completed'
-                        ? 'text-emerald-700'
-                        : status === 'current'
-                        ? 'text-blue-700 font-semibold'
-                        : 'text-gray-400 group-hover:text-gray-600'
-                    }`}
-                  >
-                    {STEP_LABELS[step]}
-                  </span>
-                </button>
+      {/* Steps */}
+      <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide">
+        {steps.map((step, index) => {
+          const status = getStepStatus(step, activeStep, completedSteps);
+          const meta = STEP_META[step];
+          const isCurrent = status === 'current';
+          const isCompleted = status === 'completed';
 
-                {/* Connector line */}
-                {!isLast && (
-                  <div className="flex-1 mx-1 h-[2px] relative">
-                    <div className="absolute inset-0 rounded-full bg-gray-100" />
-                    <div
-                      className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
-                        completedSteps.has(step)
-                          ? 'w-full bg-gradient-to-r from-emerald-400 to-emerald-500'
-                          : 'w-0'
-                      }`}
-                    />
-                  </div>
+          return (
+            <button
+              key={step}
+              type="button"
+              onClick={() => onStepClick(step)}
+              aria-current={isCurrent ? 'step' : undefined}
+              aria-label={`Step ${index + 1}: ${meta.label}`}
+              className={`
+                group relative flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all duration-200 shrink-0
+                ${isCurrent
+                  ? 'bg-white shadow-lg shadow-gray-200/50 ring-1 ring-gray-200 scale-[1.02]'
+                  : isCompleted
+                  ? 'bg-emerald-50/50 hover:bg-emerald-50'
+                  : 'hover:bg-gray-50'
+                }
+              `}
+            >
+              {/* Icon container */}
+              <span
+                className={`
+                  flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-all duration-200
+                  ${isCurrent
+                    ? 'bg-blue-100 shadow-sm'
+                    : isCompleted
+                    ? 'bg-emerald-100'
+                    : 'bg-gray-100 group-hover:bg-gray-200'
+                  }
+                `}
+              >
+                {isCompleted ? (
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                ) : (
+                  meta.icon
                 )}
-              </div>
-            );
-          })}
-        </div>
+              </span>
+
+              {/* Label */}
+              <span
+                className={`
+                  text-xs font-medium hidden sm:block transition-colors duration-200
+                  ${isCurrent
+                    ? 'text-gray-900'
+                    : isCompleted
+                    ? 'text-emerald-700'
+                    : 'text-gray-500 group-hover:text-gray-700'
+                  }
+                `}
+              >
+                {meta.label}
+              </span>
+
+              {/* Active indicator dot */}
+              {isCurrent && (
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-6 rounded-full bg-blue-500" />
+              )}
+            </button>
+          );
+        })}
       </div>
     </nav>
   );
