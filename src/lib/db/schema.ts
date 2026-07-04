@@ -311,3 +311,28 @@ export const financialEntries = pgTable(
     ),
   })
 );
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+export const messages = pgTable(
+  'messages',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id),
+    senderId: uuid('sender_id')
+      .notNull()
+      .references(() => users.id),
+    recipientId: uuid('recipient_id')
+      .notNull()
+      .references(() => users.id),
+    content: text('content').notNull(),
+    isRead: boolean('is_read').notNull().default(false),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => ({
+    tenantRecipientIdx: index('messages_tenant_recipient_idx').on(table.tenantId, table.recipientId, table.createdAt),
+    tenantSenderIdx: index('messages_tenant_sender_idx').on(table.tenantId, table.senderId, table.createdAt),
+  })
+);
