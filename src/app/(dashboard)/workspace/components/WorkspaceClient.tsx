@@ -34,6 +34,8 @@ const STEP_META: Record<WorkflowStep, string> = {
   prescription: 'Prescription',
   lab_request: 'Lab Request',
   compte_rendu: 'Summary (CR)',
+  treatment_plan: 'Treatment Plan',
+  surgery: 'Surgery/Intervention',
   pdf: 'Export PDF',
 };
 
@@ -199,6 +201,46 @@ export function WorkspaceClient({ user }: WorkspaceClientProps) {
           <HistoryStep state={state} dispatch={dispatch} user={user} />
         );
 
+      case 'treatment_plan':
+        return (
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50">
+                <svg className="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" /></svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Treatment Plan</h2>
+                <p className="text-sm text-gray-500">Patient journey timeline and treatment history</p>
+              </div>
+            </div>
+            {state.patient ? (
+              <TreatmentPlanPanel patientId={state.patient.id} />
+            ) : (
+              <p className="text-sm text-gray-500">Select a patient to view their treatment plan.</p>
+            )}
+          </div>
+        );
+
+      case 'surgery':
+        return (
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50">
+                <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.04-3.49a1.5 1.5 0 01-.42-2.08l3.49-5.04a1.5 1.5 0 012.08-.42l5.04 3.49a1.5 1.5 0 01.42 2.08l-3.49 5.04a1.5 1.5 0 01-2.08.42z" /></svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Surgery / Intervention</h2>
+                <p className="text-sm text-gray-500">Hospital procedures and surgical referrals</p>
+              </div>
+            </div>
+            {state.patient ? (
+              <SurgeryPanel patientId={state.patient.id} patientName={`${state.patient.firstName} ${state.patient.lastName}`} />
+            ) : (
+              <p className="text-sm text-gray-500">Select a patient to manage surgeries.</p>
+            )}
+          </div>
+        );
+
       default:
         return null;
     }
@@ -236,18 +278,18 @@ export function WorkspaceClient({ user }: WorkspaceClientProps) {
             </div>
             <div className="flex items-center gap-3">
               {state.appointment && (
-                <div className="hidden sm:flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-                  <div className="h-2 w-2 rounded-full bg-green-500" />
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-800">{state.appointment.startTime}</p>
-                    <p className="text-xs text-gray-500">{state.appointment.visitType.replace('_', ' ')}</p>
+                <div className="hidden sm:flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2">
+                  <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-800">{state.appointment.date}</p>
+                    <p className="text-xs text-blue-600">{state.appointment.startTime} · {state.appointment.visitType.replace('_', ' ')}</p>
                   </div>
                 </div>
               )}
               <button
                 type="button"
                 onClick={() => dispatch({ type: 'RESET' })}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
               >
                 Change Patient
               </button>
@@ -674,4 +716,93 @@ function calculateAge(dateOfBirth: string): number {
     age--;
   }
   return age;
+}
+
+/** Treatment Plan — visual timeline of patient visits */
+function TreatmentPlanPanel({ patientId }: { patientId: string }) {
+  const [visits, setVisits] = useState<Array<{ date: string; visitType: string; doctorName: string; notes?: string }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchVisits() {
+      try {
+        const res = await fetch(`/api/patients/${patientId}/visits`);
+        if (res.ok) {
+          const json = await res.json();
+          setVisits(json.data?.visits || []);
+        }
+      } catch {}
+      setLoading(false);
+    }
+    fetchVisits();
+  }, [patientId]);
+
+  if (loading) return <p className="text-sm text-gray-500">Loading treatment history...</p>;
+  if (visits.length === 0) return <p className="text-sm text-gray-400">No visit history. Treatment plan will appear after the first visit.</p>;
+
+  return (
+    <div className="space-y-4">
+      {/* Timeline */}
+      <div className="relative pl-6">
+        <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-400 via-purple-400 to-green-400" />
+        {visits.slice(0, 10).map((visit, idx) => {
+          const daysBetween = idx > 0 ? Math.round((new Date(visits[idx - 1].date).getTime() - new Date(visit.date).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+          return (
+            <div key={idx} className="relative mb-4 pl-6">
+              <div className={`absolute left-0 top-1 h-4 w-4 rounded-full border-2 border-white ${
+                visit.visitType === 'new_visit' ? 'bg-blue-500' :
+                visit.visitType === 'follow_up' ? 'bg-green-500' :
+                visit.visitType === 'control_visit' ? 'bg-purple-500' :
+                'bg-gray-400'
+              }`} />
+              <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-800">{visit.date}</span>
+                  <span className={`text-[10px] font-medium rounded-full px-2 py-0.5 ${
+                    visit.visitType === 'new_visit' ? 'bg-blue-100 text-blue-700' :
+                    visit.visitType === 'follow_up' ? 'bg-green-100 text-green-700' :
+                    visit.visitType === 'control_visit' ? 'bg-purple-100 text-purple-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>{visit.visitType.replace('_', ' ')}</span>
+                </div>
+                <p className="text-xs text-gray-600 mt-1">Dr. {visit.doctorName}</p>
+                {visit.notes && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{visit.notes}</p>}
+                {daysBetween > 0 && <p className="text-[10px] text-gray-400 mt-1">{daysBetween} days since previous visit</p>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-xs text-gray-400 text-center">{visits.length} total visits on record</p>
+    </div>
+  );
+}
+
+/** Surgery Panel — track surgical referrals */
+function SurgeryPanel({ patientId, patientName }: { patientId: string; patientName: string }) {
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-gray-100 bg-gray-50 p-6 text-center">
+        <svg className="w-12 h-12 text-gray-300 mx-auto" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.04-3.49a1.5 1.5 0 01-.42-2.08l3.49-5.04a1.5 1.5 0 012.08-.42l5.04 3.49a1.5 1.5 0 01.42 2.08l-3.49 5.04a1.5 1.5 0 01-2.08.42z" /></svg>
+        <h3 className="mt-3 text-sm font-medium text-gray-800">No Surgeries Recorded</h3>
+        <p className="mt-1 text-xs text-gray-500">When a surgery or hospital intervention is planned, it will appear here with referral documents.</p>
+        <button
+          type="button"
+          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+          Schedule Surgery
+        </button>
+      </div>
+      <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
+        <h4 className="text-xs font-semibold text-blue-800 mb-2">How it works</h4>
+        <ul className="space-y-1.5 text-xs text-blue-700">
+          <li className="flex items-start gap-2"><span className="text-blue-400">1.</span> Doctor creates a surgical referral linked to the patient</li>
+          <li className="flex items-start gap-2"><span className="text-blue-400">2.</span> Referral document is generated for the hospital</li>
+          <li className="flex items-start gap-2"><span className="text-blue-400">3.</span> Surgery date and outcome are tracked here</li>
+          <li className="flex items-start gap-2"><span className="text-blue-400">4.</span> Post-op follow-up visits are linked back</li>
+        </ul>
+      </div>
+    </div>
+  );
 }

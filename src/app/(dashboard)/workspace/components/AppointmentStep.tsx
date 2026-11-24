@@ -238,10 +238,21 @@ export function AppointmentStep({ state, dispatch, user }: AppointmentStepProps)
     return (
       <div
         data-testid="appointment-step"
-        className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+        className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
       >
+        {/* Header with icon */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50">
+            <svg className="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Appointment</h2>
+            <p className="text-sm text-gray-500">Visit scheduling and details</p>
+          </div>
+        </div>
+
         {/* Patient Header */}
-        <div className="mb-4 rounded-md bg-gray-50 px-4 py-3">
+        <div className="mb-4 rounded-lg bg-gray-50 px-4 py-3 border border-gray-100">
           <p className="text-sm text-gray-600">Patient</p>
           <p className="text-base font-medium text-gray-900">{patientName}</p>
         </div>
@@ -290,10 +301,21 @@ export function AppointmentStep({ state, dispatch, user }: AppointmentStepProps)
   return (
     <div
       data-testid="appointment-step"
-      className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+      className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
     >
+      {/* Header with icon */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50">
+          <svg className="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Book Appointment</h2>
+          <p className="text-sm text-gray-500">Schedule a visit for this patient</p>
+        </div>
+      </div>
+
       {/* Patient Header (read-only) */}
-      <div className="mb-6 rounded-md bg-gray-50 px-4 py-3">
+      <div className="mb-6 rounded-lg bg-gray-50 px-4 py-3 border border-gray-100">
         <p className="text-sm text-gray-600">Patient</p>
         <p className="text-base font-medium text-gray-900">{patientName}</p>
       </div>

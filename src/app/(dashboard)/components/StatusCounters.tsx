@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import type { DashboardAppointment } from '@/lib/services/dashboard-service';
 
 interface StatusCountersProps {
@@ -9,16 +10,46 @@ interface StatusCountersProps {
 }
 
 export default function StatusCounters({ waitingCount, seenCount, todayAppointments = [] }: StatusCountersProps) {
+  const [yesterdayTotal, setYesterdayTotal] = useState<number | null>(null);
+
   const totalToday = todayAppointments.length;
   const inProgressCount = todayAppointments.filter(a => a.status === 'in_progress').length;
   const scheduledCount = todayAppointments.filter(a => a.status === 'scheduled').length;
 
+  // Fetch yesterday's count for comparison
+  useEffect(() => {
+    async function fetchYesterday() {
+      try {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const dateStr = yesterday.toISOString().split('T')[0];
+        const res = await fetch(`/api/appointments/calendar?startDate=${dateStr}&endDate=${dateStr}`);
+        if (res.ok) {
+          const json = await res.json();
+          setYesterdayTotal((json.data || []).length);
+        }
+      } catch {}
+    }
+    fetchYesterday();
+  }, []);
+
+  function getChange(current: number): string | null {
+    if (yesterdayTotal === null) return null;
+    if (yesterdayTotal === 0 && current === 0) return '0%';
+    if (yesterdayTotal === 0 && current > 0) return '+100%';
+    const pct = Math.round(((current - yesterdayTotal) / yesterdayTotal) * 100);
+    if (pct === 0) return '0% from yesterday';
+    return pct > 0 ? `+${pct}% from yesterday` : `${pct}% from yesterday`;
+  }
+
+  const totalChange = getChange(totalToday);
+
   const stats = [
-    { label: 'Total Patients Today', value: totalToday, color: 'blue' },
-    { label: 'Waiting Room', value: waitingCount, color: 'amber' },
-    { label: 'In Consultation', value: inProgressCount, color: 'purple' },
-    { label: 'Completed', value: seenCount, color: 'green' },
-    { label: 'Scheduled', value: scheduledCount, color: 'gray' },
+    { label: 'Total Patients Today', value: totalToday, color: 'blue', change: totalChange },
+    { label: 'Waiting Room', value: waitingCount, color: 'amber', change: null },
+    { label: 'In Consultation', value: inProgressCount, color: 'purple', change: null },
+    { label: 'Completed', value: seenCount, color: 'green', change: null },
+    { label: 'Scheduled', value: scheduledCount, color: 'gray', change: null },
   ];
 
   const colorMap: Record<string, { bg: string; border: string; text: string; label: string; icon: string }> = {
@@ -47,7 +78,14 @@ export default function StatusCounters({ waitingCount, seenCount, todayAppointme
               <span className={c.icon}>{icons[stat.color]}</span>
               <p className={`text-xs font-medium ${c.label}`}>{stat.label}</p>
             </div>
-            <p className={`mt-2 text-2xl font-bold ${c.text}`}>{stat.value}</p>
+            <div className="mt-2 flex items-baseline gap-2">
+              <p className={`text-2xl font-bold ${c.text}`}>{stat.value}</p>
+              {stat.change !== null && (
+                <span className={`text-[10px] font-semibold ${stat.change.startsWith('+') ? 'text-green-600' : stat.change.startsWith('-') ? 'text-red-500' : 'text-gray-500'}`}>
+                  {stat.change} from yesterday
+                </span>
+              )}
+            </div>
           </div>
         );
       })}

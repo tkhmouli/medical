@@ -10,6 +10,8 @@ interface PatientListItem {
   lastName: string;
   phoneNumber: string;
   dateOfBirth: string;
+  gender?: string;
+  notes?: string;
 }
 
 interface VisitHistoryResult {
@@ -195,61 +197,54 @@ export default function PatientsPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-md border border-gray-200">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
-                    Name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
-                    Phone
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
-                    Status
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-                  >
-                    Last Visit
-                  </th>
+                  <th scope="col" className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Patient</th>
+                  <th scope="col" className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Age</th>
+                  <th scope="col" className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Gender</th>
+                  <th scope="col" className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Phone</th>
+                  <th scope="col" className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
+                  <th scope="col" className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Last Visit</th>
+                  <th scope="col" className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {patients.map((patient) => (
-                  <tr
-                    key={patient.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <Link
-                        href={`/patients/${patient.id}`}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
-                      >
-                        {patient.firstName} {patient.lastName}
-                      </Link>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-                      {patient.phoneNumber}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <ClassificationBadge classification={patient.classification} />
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-                      {formatDate(patient.lastVisitDate)}
-                    </td>
-                  </tr>
-                ))}
+              <tbody className="divide-y divide-gray-100 bg-white">
+                {patients.map((patient) => {
+                  const age = calculateAge(patient.dateOfBirth);
+                  return (
+                    <tr key={patient.id} className="hover:bg-blue-50/30 transition-colors">
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <Link href={`/patients/${patient.id}`} className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs font-bold shrink-0">
+                            {patient.lastName[0]}{patient.firstName[0]}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{patient.lastName}, {patient.firstName}</p>
+                            <p className="text-[11px] text-gray-500">DOB: {formatDate(patient.dateOfBirth)}</p>
+                          </div>
+                        </Link>
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700">{age} yrs</td>
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                          patient.gender === 'male' ? 'bg-blue-50 text-blue-700' :
+                          patient.gender === 'female' ? 'bg-pink-50 text-pink-700' :
+                          'bg-gray-50 text-gray-700'
+                        }`}>
+                          {patient.gender === 'male' ? 'M' : patient.gender === 'female' ? 'F' : 'O'}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700">{patient.phoneNumber}</td>
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <ClassificationBadge classification={patient.classification} />
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm text-gray-700">{formatDate(patient.lastVisitDate)}</td>
+                      <td className="max-w-[150px] truncate px-5 py-4 text-xs text-gray-500">{patient.notes || '—'}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -280,4 +275,13 @@ function ClassificationBadge({
       First-time
     </span>
   );
+}
+
+function calculateAge(dateOfBirth: string): number {
+  const today = new Date();
+  const birth = new Date(dateOfBirth);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
 }

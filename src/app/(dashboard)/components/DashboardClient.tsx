@@ -147,6 +147,9 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
       {/* Stat Cards */}
       <StatusCounters waitingCount={stats.waitingCount} seenCount={stats.seenCount} todayAppointments={stats.today} />
 
+      {/* Demographics Breakdown — gender/age distribution */}
+      <DemographicsChart appointments={stats.today} />
+
       {/* Main grid layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column */}
@@ -324,6 +327,91 @@ export default function DashboardClient({ user, initialStats }: DashboardClientP
           </div>
 
           {/* View Schedule — removed */}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Demographics donut chart — shows gender/age breakdown for the day's patients */
+function DemographicsChart({ appointments }: { appointments: DashboardAppointment[] }) {
+  const [demographics, setDemographics] = useState<{ male: number; female: number; other: number; kids: number; adults: number }>({ male: 0, female: 0, other: 0, kids: 0, adults: 0 });
+
+  useEffect(() => {
+    if (appointments.length === 0) { setDemographics({ male: 0, female: 0, other: 0, kids: 0, adults: 0 }); return; }
+    async function fetchDemographics() {
+      const patientIds = Array.from(new Set(appointments.map(a => a.patientId)));
+      let male = 0, female = 0, other = 0, kids = 0, adults = 0;
+      await Promise.all(patientIds.slice(0, 30).map(async (pid) => {
+        try {
+          const res = await fetch(`/api/patients/${pid}`);
+          if (res.ok) {
+            const json = await res.json();
+            const p = json.data;
+            if (p) {
+              if (p.gender === 'male') male++;
+              else if (p.gender === 'female') female++;
+              else other++;
+              const age = new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear();
+              if (age < 18) kids++; else adults++;
+            }
+          }
+        } catch {}
+      }));
+      setDemographics({ male, female, other, kids, adults });
+    }
+    fetchDemographics();
+  }, [appointments]);
+
+  const total = demographics.male + demographics.female + demographics.other;
+  if (total === 0) return null;
+
+  const malePercent = Math.round((demographics.male / total) * 100);
+  const femalePercent = Math.round((demographics.female / total) * 100);
+  const kidsPercent = Math.round((demographics.kids / total) * 100);
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <h3 className="text-sm font-semibold text-gray-900 mb-4">Patient Demographics (Today)</h3>
+      <div className="flex items-center gap-8">
+        {/* Gender donut */}
+        <div className="relative h-24 w-24 shrink-0">
+          <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="14" fill="none" stroke="#f3f4f6" strokeWidth="3.5" />
+            <circle cx="18" cy="18" r="14" fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeDasharray={`${(demographics.male / total) * 88} 88`} strokeLinecap="round" />
+            <circle cx="18" cy="18" r="14" fill="none" stroke="#ec4899" strokeWidth="3.5" strokeDasharray={`${(demographics.female / total) * 88} 88`} strokeDashoffset={`-${(demographics.male / total) * 88}`} strokeLinecap="round" />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-lg font-bold text-gray-900">{total}</span>
+            <span className="text-[9px] text-gray-500">patients</span>
+          </div>
+        </div>
+        {/* Legend */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-blue-500" />
+            <span className="text-xs text-gray-700">Male — {malePercent}% ({demographics.male})</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-pink-500" />
+            <span className="text-xs text-gray-700">Female — {femalePercent}% ({demographics.female})</span>
+          </div>
+          {demographics.other > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-gray-400" />
+              <span className="text-xs text-gray-700">Other — {Math.round((demographics.other / total) * 100)}% ({demographics.other})</span>
+            </div>
+          )}
+          <div className="border-t border-gray-100 pt-2 mt-2">
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-sm bg-amber-400" />
+              <span className="text-xs text-gray-700">Children (&lt;18) — {kidsPercent}% ({demographics.kids})</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="h-3 w-3 rounded-sm bg-green-400" />
+              <span className="text-xs text-gray-700">Adults — {100 - kidsPercent}% ({demographics.adults})</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

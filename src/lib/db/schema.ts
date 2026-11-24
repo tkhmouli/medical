@@ -16,7 +16,7 @@ import {
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 export const roleEnum = pgEnum('role', ['Admin', 'Doctor', 'Medical_Assistant']);
-export const visitTypeEnum = pgEnum('visit_type', ['new_visit', 'control_visit', 'follow_up']);
+export const visitTypeEnum = pgEnum('visit_type', ['new_visit', 'control_visit', 'follow_up', 'lab_review', 'no_show']);
 export const genderEnum = pgEnum('gender', ['male', 'female', 'other']);
 export const insuranceProviderEnum = pgEnum('insurance_provider', [
   'CNSS',

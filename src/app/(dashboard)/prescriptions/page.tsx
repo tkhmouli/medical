@@ -41,6 +41,7 @@ export default function PrescriptionsPage() {
   const [prescriptions, setPrescriptions] = useState<PrescriptionDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
@@ -172,8 +173,19 @@ export default function PrescriptionsPage() {
         </Link>
       </div>
 
+      {/* Search */}
+      <div className="mt-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by patient name, phone, or notes..."
+          className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
       {/* Content */}
-      <div className="mt-6">
+      <div className="mt-4">
         {loading ? (
           <LoadingSpinner label="Loading prescriptions..." />
         ) : error ? (
@@ -225,7 +237,11 @@ export default function PrescriptionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-green-100 bg-green-50/30">
-                {prescriptions.map((prescription) => (
+                {prescriptions.filter(rx => {
+                  if (!searchQuery.trim()) return true;
+                  const q = searchQuery.toLowerCase();
+                  return rx.patientName.toLowerCase().includes(q) || (rx.notes || '').toLowerCase().includes(q) || rx.createdAt.includes(q);
+                }).map((prescription) => (
                   <tr
                     key={prescription.id}
                     className="hover:bg-green-50 transition-colors"

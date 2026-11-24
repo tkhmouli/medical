@@ -11,6 +11,8 @@ export type WorkflowStep =
   | 'prescription'
   | 'lab_request'
   | 'compte_rendu'
+  | 'treatment_plan'
+  | 'surgery'
   | 'pdf';
 
 export type StepStatus = 'upcoming' | 'current' | 'completed';
@@ -88,6 +90,8 @@ const ALL_STEPS: WorkflowStep[] = [
   'prescription',
   'lab_request',
   'compte_rendu',
+  'treatment_plan',
+  'surgery',
 ];
 
 export const initialVisitContext: VisitContextState = {
